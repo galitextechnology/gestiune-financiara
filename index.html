@@ -239,6 +239,41 @@ function BarChart({dataPoints, width=700, height=300, barColor1="var(--green)", 
   );
 }
 
+const APP_PASSWORD = "11990";
+
+function LoginScreen({onLogin}) {
+  const [pwd, setPwd] = useState("");
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+  const tryLogin = () => {
+    if(pwd === APP_PASSWORD) {
+      try { sessionStorage.setItem("gestiune_auth","1"); } catch(e) {}
+      onLogin();
+    } else {
+      setError(true);
+      setShake(true);
+      setTimeout(()=>setShake(false), 500);
+    }
+  };
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px",background:"var(--bg)"}}>
+      <div style={{maxWidth:"380px",width:"100%",animation:shake?"shake 0.5s":"none"}}>
+        <style>{`@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}`}</style>
+        <div style={{textAlign:"center",marginBottom:"28px"}}>
+          <div style={{fontSize:"48px",marginBottom:"12px"}}>🔒</div>
+          <h1 style={{fontSize:"22px",fontWeight:"800",marginBottom:"6px"}}>Gestiune Financiara</h1>
+          <p style={{color:"var(--text2)",fontSize:14}}>Introdu parola pentru a accesa aplicatia</p>
+        </div>
+        <div className="card"><div className="card-body" style={{display:"flex",flexDirection:"column",gap:12}}>
+          <input className="input" type="password" value={pwd} onChange={e=>{setPwd(e.target.value);setError(false);}} placeholder="Parola" onKeyDown={e=>e.key==="Enter"&&tryLogin()} autoFocus style={{fontSize:18,textAlign:"center",padding:"14px",letterSpacing:8}}/>
+          {error&&<div style={{color:"var(--red)",fontSize:13,textAlign:"center",padding:"6px",background:"var(--red-bg)",borderRadius:6}}>Parola incorecta!</div>}
+          <button className="btn" onClick={tryLogin} style={{background:"var(--blue)",padding:"14px",fontSize:16}}>🔓 Acceseaza</button>
+        </div></div>
+      </div>
+    </div>
+  );
+}
+
 function SetupWizard({onConnect}) {
   const [url, setUrl] = useState(SAVED_URL || localStorage.getItem("gestiune_url") || "");
   const [testing, setTesting] = useState(false);
@@ -273,6 +308,7 @@ function SetupWizard({onConnect}) {
 }
 
 function App() {
+  const [authenticated, setAuthenticated] = useState(()=>{try{return sessionStorage.getItem("gestiune_auth")==="1";}catch(e){return false;}});
   const [connected, setConnected] = useState(false);
   const [scriptUrl, setScriptUrl] = useState("");
   const [data, setData] = useState(emptyData);
@@ -661,6 +697,7 @@ function App() {
   const restoreJSON=(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(ev)=>{try{const r=JSON.parse(ev.target.result);if(r&&typeof r==="object"){const m={...emptyData(),...r};if(!m.dateFirma)m.dateFirma={...DEFAULT_FIRMA};setData(m);triggerSave(m);alert("Date restaurate!");}else{alert("Fisier invalid.");}}catch(err){alert("Eroare: "+err.message);}};reader.readAsText(file);e.target.value="";};
   const printReport=()=>window.print();
 
+  if(!authenticated) return <LoginScreen onLogin={()=>setAuthenticated(true)}/>;
   if(!connected) return <SetupWizard onConnect={handleConnect}/>;
 
   const saveLabel={idle:"",pending:"⏳",saving:"💾 Se salveaza...",saved:"✅ Salvat",error:"❌ Eroare"};
