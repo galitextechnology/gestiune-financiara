@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestiune Financiara - GALITEX TECHNOLOGY SRL</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a56db">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gestiune">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--bg2:#fff;--bg3:#f9fafb;--bg-hover:#fafafa;
+  --text:#111827;--text2:#6b7280;--text3:#9ca3af;
+  --border:#e5e7eb;--border2:#f3f4f6;--border3:#d1d5db;
+  --card-shadow:0 1px 3px rgba(0,0,0,0.08);
+  --green:#059669;--red:#dc2626;--blue:#1a56db;--blue2:#1e40af;
+  --yellow:#f59e0b;--orange:#b45309;--purple:#7c3aed;
+  --green-bg:#ecfdf5;--red-bg:#fef2f2;--blue-bg:#eff6ff;--yellow-bg:#fffbeb;--blue-bg2:#e0edff;
+  --header-bg:linear-gradient(135deg,#1a56db,#1e40af);
+  --pre-bg:#1e293b;--pre-text:#e2e8f0;
+}
+[data-theme="dark"]{
+  --bg:#111827;--bg2:#1f2937;--bg3:#374151;--bg-hover:#374151;
+  --text:#f3f4f6;--text2:#9ca3af;--text3:#6b7280;
+  --border:#374151;--border2:#4b5563;--border3:#4b5563;
+  --card-shadow:0 1px 3px rgba(0,0,0,0.3);
+  --green:#34d399;--red:#f87171;--blue:#60a5fa;--blue2:#3b82f6;
+  --yellow:#fbbf24;--orange:#f59e0b;--purple:#a78bfa;
+  --green-bg:#064e3b;--red-bg:#7f1d1d;--blue-bg:#1e3a5f;--yellow-bg:#78350f;--blue-bg2:#1e3a5f;
+  --header-bg:linear-gradient(135deg,#1e3a5f,#1e293b);
+  --pre-bg:#0f172a;--pre-text:#e2e8f0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s}
+input,select,button{font-family:inherit}
+.input{padding:10px 12px;border:1px solid var(--border3);border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;background:var(--bg2);color:var(--text);transition:background 0.3s,color 0.3s}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,0.1)}
+.btn{padding:10px 20px;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
+.btn:hover{opacity:0.9}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.card{background:var(--bg2);border-radius:12px;box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;transition:background 0.3s}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg3);font-weight:700;font-size:15px;transition:background 0.3s}
+.card-body{padding:16px 20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 12px;text-align:left;font-weight:600;font-size:13px;background:var(--bg3);border-bottom:2px solid var(--border);transition:background 0.3s}
+td{padding:10px 12px;border-bottom:1px solid var(--border2)}
+tr:hover{background:var(--bg-hover)}
+.badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text)}
+.badge-cash{background:#fef3c7;color:#92400e}
+.badge-op{background:#dbeafe;color:#1e40af}
+.stat{background:var(--bg2);border-radius:12px;padding:18px 20px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:170px;transition:background 0.3s}
+.tab{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all 0.2s}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.step{display:flex;align-items:center;gap:12px;padding:16px;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;background:var(--bg2)}
+.step.active{background:var(--blue-bg);border:2px solid var(--blue)}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+pre{background:var(--pre-bg);color:var(--pre-text);padding:14px;border-radius:8px;font-size:11px;overflow:auto;max-height:200px;line-height:1.5;white-space:pre-wrap;word-break:break-all}
+.remove-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px 8px}
+.remove-btn:hover{opacity:0.7}
+.edit-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--blue);padding:4px 8px}
+.edit-btn:hover{opacity:0.7}
+.bar-bg{background:var(--border);border-radius:4px;height:7px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#1e40af);border-radius:4px;transition:width 0.3s}
+.alert-card{padding:12px 16px;border-radius:10px;border-left:4px solid;margin-bottom:10px;font-size:13px}
+.alert-warn{border-color:#f59e0b;background:var(--yellow-bg);color:var(--text)}
+.alert-danger{border-color:#ef4444;background:var(--red-bg);color:var(--text)}
+.alert-info{border-color:#3b82f6;background:var(--blue-bg);color:var(--text)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:var(--bg2);border-radius:16px;padding:28px;max-width:520px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+.search-modal{max-width:720px}
+/* Oblio-style Registru de Casa */
+.rc-oblio-wrap{background:#fff;color:#000;padding:0}
+.rc-oblio-company{padding:20px 24px 0;font-size:13px;line-height:1.5}
+.rc-oblio-company strong{font-size:16px;display:block;margin-bottom:2px}
+.rc-oblio-title-wrap{text-align:center;padding:20px 0 8px}
+.rc-oblio-title{display:inline-block;background:#3d2c6e;color:#fff;padding:10px 40px;font-size:18px;font-weight:700;border-radius:4px}
+.rc-oblio-period{text-align:center;font-size:13px;color:#333;margin-bottom:16px;border-bottom:1px solid #ddd;padding-bottom:12px}
+.rc-oblio-table{border-collapse:collapse;width:100%;background:#fff;color:#000;font-size:12px}
+.rc-oblio-table th{background:#3d2c6e;color:#fff;padding:10px 8px;text-align:center;font-weight:600;font-size:11px;border:1px solid #3d2c6e}
+.rc-oblio-table td{border:1px solid #ddd;padding:8px 10px;vertical-align:middle}
+.rc-oblio-table tr.rc-sold-row{background:#f8f9fa}
+.rc-oblio-table tr.rc-sold-row td{font-weight:600;border-top:1px solid #bbb}
+.rc-oblio-footer{padding:16px 24px;font-size:13px;font-weight:600;border-top:1px solid #ddd;background:#fff;color:#000}
+.rc-oblio-page{text-align:center;padding:12px;font-size:12px;color:#666}
+.filter-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.filter-row select{padding:6px 10px;border-radius:6px;border:1px solid var(--border3);font-size:12px;background:var(--bg2);color:var(--text)}
+.filter-row label{font-size:11px;font-weight:600;color:var(--text2)}
+@media print{
+  :root,[data-theme="dark"]{
+    --bg:#fff!important;--bg2:#fff!important;--bg3:#f9fafb!important;--bg-hover:#fafafa!important;
+    --text:#111827!important;--text2:#6b7280!important;--text3:#9ca3af!important;
+    --border:#e5e7eb!important;--border2:#f3f4f6!important;--border3:#d1d5db!important;
+    --green:#059669!important;--red:#dc2626!important;--blue:#1a56db!important;
+    --yellow:#f59e0b!important;--orange:#b45309!important;--purple:#7c3aed!important;
+    --green-bg:#ecfdf5!important;--red-bg:#fef2f2!important;--blue-bg:#eff6ff!important;
+    --yellow-bg:#fffbeb!important;--blue-bg2:#e0edff!important;
+    --card-shadow:none!important;
+  }
+  body{background:#fff!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none!important}
+  .print-only{display:block!important}
+  .card{box-shadow:none!important;border:1px solid #ccc!important;break-inside:auto!important;page-break-inside:auto!important;background:#fff!important}
+  table{font-size:11px}
+  th{background:#f3f4f6!important;color:#111827!important}
+  td{color:#111827!important}
+  tr:hover{background:transparent!important}
+  .badge{background:#f3f4f6!important;color:#111827!important}
+  .badge-cash{background:#fef3c7!important;color:#92400e!important}
+  .badge-op{background:#dbeafe!important;color:#1e40af!important}
+  .stat{background:#fff!important;box-shadow:none!important;border:1px solid #ccc!important}
+  .card-header{background:#f9fafb!important;color:#111827!important}
+  .card-body{background:#fff!important;color:#111827!important}
+  #root>div>div:first-child{display:none!important}
+  .main-content{padding:0 20px 20px!important;max-width:none!important}
+  .rc-oblio-wrap{border:none!important;box-shadow:none!important}
+  .rc-oblio-table th{background:#3d2c6e!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .rc-oblio-title{background:#3d2c6e!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .rc-oblio-table,.rc-oblio-table th,.rc-oblio-table td{border:1px solid #999!important}
+  .rc-oblio-table tr.rc-sold-row{background:#f0f0f0!important;-webkit-print-color-adjust:exact!important}
+  @page{size:A4;margin:10mm 12mm}
+  .main-content>div{max-width:100%!important}
+  .rc-oblio-wrap{width:100%!important}
+  .rc-oblio-table{font-size:11px!important}
+  .rc-oblio-table th{font-size:10px!important;padding:6px 6px!important}
+  .rc-oblio-table td{padding:6px 8px!important;font-size:11px!important}
+  .rc-oblio-company{padding:12px 16px 0!important}
+  .rc-oblio-company strong{font-size:14px!important}
+  .rc-oblio-title{font-size:16px!important;padding:8px 30px!important}
+  .rc-oblio-footer{padding:10px 16px!important;font-size:12px!important}
+}
+.print-only{display:none}
+@media(max-width:768px){
+  .stat{min-width:calc(50% - 8px)!important;padding:14px 16px!important}
+  .tab{padding:8px 10px!important;font-size:11px!important}
+  .main-content{padding:12px 12px 30px!important}
+  table{font-size:11px}
+  th,td{padding:6px 8px!important}
+  .card-body{padding:12px 14px!important}
+  .card-header{padding:10px 14px!important;font-size:13px!important}
+  .modal{padding:20px!important;width:95%!important}
+  svg{max-width:100%!important}
+}
+@media(max-width:480px){
+  .stat{min-width:100%!important}
+  .tab{padding:6px 8px!important;font-size:10px!important}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useRef, useMemo, useCallback} = React;
+
+const TVA = 0.21, PROFIT_TAX = 0.16;
+const MONTHS = ["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
+const YEARS = [2025,2026,2027,2028,2029,2030];
+const DEFAULT_CATS = ["Materiale","Combustibil","Utilitati","Servicii","Echipamente","Transport","Chirie","Telefonie/Internet","Asigurari","Salarii","Altele"];
+const DEFAULT_CATS_NOTVA = ["Salarii brute","Contributii sociale (CAS/CASS)","Contributia asiguratorie munca","Amortizari","Taxe si impozite locale","Comisioane bancare","Dobanzi credite/leasing","Asigurari","Tichete de masa","Altele fara TVA"];
+const QUARTERS = [[0,1,2],[3,4,5],[6,7,8],[9,10,11]];
+const Q_NAMES = ["T1 (Ian-Mar)","T2 (Apr-Jun)","T3 (Iul-Sep)","T4 (Oct-Dec)"];
+const TIP_DOC_OPTIONS = ["Chitanta","Bon fiscal","Alta incasare numerar","Alta plata numerar","Dispozitie de plata","Dispozitie de incasare","Stat de plata","Transfer"];
+
+const DEFAULT_FIRMA = {
+  nume:"SC GALITEX TECHNOLOGY SRL",
+  cui:"RO28098473",
+  regCom:"J27/133/2011",
+  sediu:"STEFAN CEL MARE, FN",
+  localitate:"JUD. NEAMT, SAT PILDESTI, COM. CORDUN",
+  cont:"RO85 BTRL RON CRT0 CI78 79 101",
+  banca:"BANCA TRANSILVANIA",
+  administrator:"CIOBANU GABRIEL"
+};
+
+const getBase = v => v/(1+TVA);
+const getTva = v => v - getBase(v);
+const fmt = n => new Intl.NumberFormat("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const fmtDate = d => {if(!d) return ""; const p=d.split("-"); return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d;};
+const monthIndex = m => MONTHS.indexOf(m);
+const daysInMonth = (y,m) => new Date(y, monthIndex(m)+1, 0).getDate();
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+const emptyData = () => {
+  const d = {furnizoriSalvati:[],clientiSalvati:[],categoriiTVA:[...DEFAULT_CATS],categoriiNoTVA:[...DEFAULT_CATS_NOTVA],dateFirma:{...DEFAULT_FIRMA},registruCasaSolduri:{}};
+  YEARS.forEach(y=>{d[y]={};MONTHS.forEach(m=>{d[y][m]={plati:[],incasari:[],cheltuieliFaraTVA:[],operatiuniCasa:[]};});});
+  return d;
+};
+
+const SAVED_URL = "https://script.google.com/macros/s/AKfycbxkZbmZ5elMm6i7nP2tkYgugJ-Eu-ujOvoXU3QbGEmqhDUxM0hLSwe40jte80zyss_VmQ/exec";
+
+const SCRIPT_CODE = `function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("GestiuneData");
+    if (!sheet || !sheet.getRange("A1").getValue()) {
+      return respond({ success: true, data: null });
+    }
+    var raw = sheet.getRange("A1").getValue();
+    var data = JSON.parse(raw);
+    return respond({ success: true, data: data });
+  } catch (err) {
+    return respond({ success: false, error: err.message });
+  }
+}
+function doPost(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("GestiuneData");
+    if (!sheet) { sheet = ss.insertSheet("GestiuneData"); }
+    var payload = JSON.parse(e.postData.contents);
+    sheet.getRange("A1").setValue(JSON.stringify(payload.data));
+    sheet.getRange("A2").setValue(new Date().toISOString());
+    return respond({ success: true });
+  } catch (err) {
+    return respond({ success: false, error: err.message });
+  }
+}
+function respond(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}`;
+
+function BarChart({dataPoints, width=700, height=300, barColor1="var(--green)", barColor2="var(--red)", barColor3="var(--orange)", labels}) {
+  if(!dataPoints||dataPoints.length===0) return <div style={{color:"var(--text3)",textAlign:"center",padding:30}}>Nu sunt date pentru grafic.</div>;
+  const maxVal = Math.max(...dataPoints.flatMap(d=>[d.v1||0,d.v2||0,(d.v2||0)+(d.v3||0)]),1);
+  const barW = Math.min(20, (width-80)/(dataPoints.length*4));
+  const chartH = height-60, startX = 60, stepX = (width-80)/dataPoints.length;
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{width:"100%",maxWidth:width,height:"auto"}}>
+      {[0,0.25,0.5,0.75,1].map((r,i)=>{const y=20+chartH*(1-r);return <g key={i}><line x1={startX} y1={y} x2={width-20} y2={y} stroke="var(--border)" strokeWidth="1" strokeDasharray={r===0?"":"4,4"}/><text x={startX-8} y={y+4} textAnchor="end" fill="var(--text2)" fontSize="10">{fmt(maxVal*r)}</text></g>;})}
+      {dataPoints.map((d,i)=>{const x=startX+i*stepX+stepX/2;const h1=(d.v1||0)/maxVal*chartH;const h2=(d.v2||0)/maxVal*chartH;const h3=(d.v3||0)/maxVal*chartH;return <g key={i}><rect x={x-barW*1.5} y={20+chartH-h1} width={barW} height={h1} fill={barColor1} rx="2"/><rect x={x-barW*0.3} y={20+chartH-h2-h3} width={barW} height={h2+h3} fill={barColor2} rx="2"/>{d.v3>0&&<rect x={x-barW*0.3} y={20+chartH-h3} width={barW} height={h3} fill={barColor3} rx="2"/>}<text x={x} y={height-8} textAnchor="middle" fill="var(--text2)" fontSize="9">{d.label}</text></g>;})}
+      {labels&&<g>{labels.map((l,i)=><g key={i} transform={`translate(${startX+i*90},${height-22})`}><rect x="0" y="-6" width="10" height="10" rx="2" fill={[barColor1,barColor2,barColor3][i]}/><text x="14" y="3" fill="var(--text2)" fontSize="10">{l}</text></g>)}</g>}
+    </svg>
+  );
+}
+
+function SetupWizard({onConnect}) {
+  const [url, setUrl] = useState(SAVED_URL || localStorage.getItem("gestiune_url") || "");
+  const [testing, setTesting] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [step, setStep] = useState(4);
+  const [autoTried, setAutoTried] = useState(false);
+  const copyCode=()=>{navigator.clipboard.writeText(SCRIPT_CODE).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});};
+  const testConn = async (testUrl) => {
+    const u = testUrl || url;
+    if (!u.includes("script.google.com")) {setError("URL-ul nu e valid.");return;}
+    setTesting(true); setError("");
+    try {const res = await fetch(u, {redirect:"follow"});const json = await res.json();
+      if (json.success !== undefined) {try{localStorage.setItem("gestiune_url",u);}catch(e){}onConnect(u, json.data);} else {setError("Raspunsul nu e valid.");}
+    } catch(e) {setError("Nu s-a putut conecta. Eroare: " + e.message);}
+    setTesting(false);
+  };
+  useEffect(()=>{if(!autoTried&&url&&url.includes("script.google.com")){setAutoTried(true);testConn(url);}},[]);
+  return (
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px",background:"var(--bg)"}}>
+      <div style={{maxWidth:"640px",width:"100%"}}>
+        <div style={{textAlign:"center",marginBottom:"32px"}}><div style={{fontSize:"36px",marginBottom:"8px"}}>📊</div><h1 style={{fontSize:"24px",fontWeight:"800",marginBottom:"8px"}}>Gestiune Financiara</h1><p style={{color:"var(--text2)"}}>Conecteaza-te la Google Sheets pentru a salva datele</p></div>
+        <div className="card"><div className="card-body" style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+          <div className={"step"+(step===1?" active":"")} onClick={()=>setStep(1)}><div className="step-num">1</div><div><div style={{fontWeight:600,fontSize:14}}>Creeaza un Google Sheet nou</div><div style={{fontSize:13,color:"var(--text2)"}}>Du-te la <a href="https://sheets.google.com" target="_blank">sheets.google.com</a></div></div></div>
+          <div className={"step"+(step===2?" active":"")} onClick={()=>setStep(2)}><div className="step-num">2</div><div style={{flex:1}}><div style={{fontWeight:600,fontSize:14}}>Lipeste codul in Apps Script</div><div style={{fontSize:13,color:"var(--text2)"}}>Extensions → Apps Script → sterge totul → lipeste codul</div>{step===2&&<div style={{marginTop:12}}><pre>{SCRIPT_CODE}</pre><button className="btn" onClick={copyCode} style={{background:copied?"var(--green)":"#1e293b",marginTop:8,fontSize:13,padding:"8px 16px"}}>{copied?"✓ Copiat!":"📋 Copiaza codul"}</button></div>}</div></div>
+          <div className={"step"+(step===3?" active":"")} onClick={()=>setStep(3)}><div className="step-num">3</div><div><div style={{fontWeight:600,fontSize:14}}>Deploy ca Web App</div><div style={{fontSize:13,color:"var(--text2)"}}>Save → Deploy → New Deployment → Web App → Execute as: <b>Me</b> → Who has access: <b>Anyone</b></div></div></div>
+          <div className={"step"+(step===4?" active":"")} onClick={()=>setStep(4)}><div className="step-num">4</div><div style={{flex:1}}><div style={{fontWeight:600,fontSize:14}}>Lipeste URL-ul si conecteaza-te</div>{step===4&&<div style={{marginTop:12,display:"flex",flexDirection:"column",gap:8}}><input className="input" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://script.google.com/macros/s/.../exec" onKeyDown={e=>e.key==="Enter"&&testConn()}/><button className="btn" onClick={()=>testConn()} disabled={testing||!url} style={{background:"var(--blue)"}}>{testing?"⏳ Se conecteaza...":"🔗 Conecteaza-te"}</button>{error&&<div style={{color:"var(--red)",fontSize:13,padding:"8px 12px",background:"var(--red-bg)",borderRadius:6}}>{error}</div>}</div>}</div></div>
+        </div></div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [connected, setConnected] = useState(false);
+  const [scriptUrl, setScriptUrl] = useState("");
+  const [data, setData] = useState(emptyData);
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState("Aprilie");
+  const [tab, setTab] = useState("dashboard");
+  const [saveStatus, setSaveStatus] = useState("idle");
+  const [nextId, setNextId] = useState(1);
+  const [newP, setNewP] = useState({name:"",amount:"",category:"Materiale",tipPlata:"OP",data:todayISO()});
+  const [newI, setNewI] = useState({name:"",amount:"",tipPlata:"OP",data:todayISO()});
+  const [newC, setNewC] = useState({name:"",amount:"",category:"Salarii brute",tipPlata:"Cash",data:todayISO()});
+  const [newFurn, setNewFurn] = useState("");
+  const [newCli, setNewCli] = useState("");
+  const [darkMode, setDarkMode] = useState(()=>localStorage.getItem("gestiune_dark")==="true");
+  const [showSettings, setShowSettings] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
+  const [editContactVal, setEditContactVal] = useState("");
+  const [showCatModal, setShowCatModal] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [catModalType, setCatModalType] = useState("tva");
+  const [showFirmaModal, setShowFirmaModal] = useState(false);
+  const [editFirma, setEditFirma] = useState({...DEFAULT_FIRMA});
+  const [rcSoldInitial, setRcSoldInitial] = useState("");
+  const [showOpCasaForm, setShowOpCasaForm] = useState(false);
+  const [newOpCasa, setNewOpCasa] = useState({tipOp:"Incasare",numeOp:"Chitanta",suma:"",data:todayISO(),nrDocument:"",explicatie:"",categorie:""});
+  const [editModal, setEditModal] = useState(null);
+  /* ===== SEARCH ===== */
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  /* ===== FILTERS ===== */
+  const [filterPlati, setFilterPlati] = useState({category:"",tipPlata:""});
+  const [filterIncasari, setFilterIncasari] = useState({tipPlata:""});
+  const [filterCheltuieli, setFilterCheltuieli] = useState({category:"",tipPlata:""});
+  const saveTimer = useRef(null);
+
+  useEffect(()=>{document.documentElement.setAttribute("data-theme",darkMode?"dark":"");localStorage.setItem("gestiune_dark",darkMode);},[darkMode]);
+
+  /* ===== AUTO-BACKUP on connect ===== */
+  const handleConnect = (url, loaded) => {
+    setScriptUrl(url);
+    if (loaded) {
+      const m = {...emptyData(),...loaded};
+      if(!m.furnizoriSalvati) m.furnizoriSalvati=[];
+      if(!m.clientiSalvati) m.clientiSalvati=[];
+      if(!m.categoriiTVA||m.categoriiTVA.length===0) m.categoriiTVA=[...DEFAULT_CATS];
+      if(!m.categoriiNoTVA||m.categoriiNoTVA.length===0) m.categoriiNoTVA=[...DEFAULT_CATS_NOTVA];
+      if(!m.dateFirma) m.dateFirma={...DEFAULT_FIRMA};
+      if(!m.registruCasaSolduri) m.registruCasaSolduri={};
+      YEARS.forEach(y=>MONTHS.forEach(mo=>{
+        if(m[y]&&m[y][mo]){
+          if(!m[y][mo].cheltuieliFaraTVA) m[y][mo].cheltuieliFaraTVA=[];
+          if(!m[y][mo].operatiuniCasa) m[y][mo].operatiuniCasa=[];
+        }
+      }));
+      setData(m);
+      setEditFirma({...DEFAULT_FIRMA,...m.dateFirma});
+      let mx=0;
+      YEARS.forEach(y=>MONTHS.forEach(mo=>{const md=m[y]?.[mo];if(!md)return;md.plati?.forEach(p=>{if(p.id>mx)mx=p.id;});md.incasari?.forEach(i=>{if(i.id>mx)mx=i.id;});md.cheltuieliFaraTVA?.forEach(c=>{if(c.id>mx)mx=c.id;});(md.operatiuniCasa||[]).forEach(o=>{if(o.id>mx)mx=o.id;});}));
+      setNextId(mx+1);
+      /* Auto-backup JSON la fiecare sesiune */
+      try {
+        const blob = new Blob([JSON.stringify(m,null,2)],{type:"application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `gestiune_autobackup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch(e) { console.warn("Auto-backup failed:", e); }
+    }
+    setConnected(true);
+  };
+
+  const firma = data.dateFirma||DEFAULT_FIRMA;
+  const furnizori = data.furnizoriSalvati||[];
+  const clienti = data.clientiSalvati||[];
+  const CATS = data.categoriiTVA||DEFAULT_CATS;
+  const CATS_NOTVA = data.categoriiNoTVA||DEFAULT_CATS_NOTVA;
+  const cur = data[year]?.[month]||{plati:[],incasari:[],cheltuieliFaraTVA:[],operatiuniCasa:[]};
+  const chFTVA = cur.cheltuieliFaraTVA||[];
+  const opsCasa = cur.operatiuniCasa||[];
+
+  const saveToSheets = useCallback(async(d)=>{if(!scriptUrl)return;setSaveStatus("saving");try{const r=await fetch(scriptUrl,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({data:d}),redirect:"follow"});const j=await r.json();setSaveStatus(j.success?"saved":"error");if(j.success)setTimeout(()=>setSaveStatus("idle"),3000);}catch(e){console.error("Save error:",e);setSaveStatus("error");}},[scriptUrl]);
+  const triggerSave = useCallback((d)=>{if(!connected)return;if(saveTimer.current)clearTimeout(saveTimer.current);setSaveStatus("pending");saveTimer.current=setTimeout(()=>saveToSheets(d),1500);},[connected,saveToSheets]);
+  const updateData=(nd)=>{setData(nd);triggerSave(nd);};
+
+  /* ===== ADD with date from state ===== */
+  const addPlata=()=>{
+    if(!newP.name||!newP.amount)return;
+    const d={...data};
+    d[year][month]={...cur,plati:[...cur.plati,{id:nextId,name:newP.name,amount:parseFloat(newP.amount),category:newP.category,tipPlata:newP.tipPlata,data:newP.data||todayISO()}]};
+    if(!furnizori.includes(newP.name))d.furnizoriSalvati=[...furnizori,newP.name];
+    setNextId(nextId+1);setNewP({name:"",amount:"",category:CATS[0]||"Materiale",tipPlata:"OP",data:todayISO()});
+    updateData({...d});
+  };
+  const addIncasare=()=>{
+    if(!newI.name||!newI.amount)return;
+    const d={...data};
+    d[year][month]={...cur,incasari:[...cur.incasari,{id:nextId,name:newI.name,amount:parseFloat(newI.amount),tipPlata:newI.tipPlata,data:newI.data||todayISO()}]};
+    if(!clienti.includes(newI.name))d.clientiSalvati=[...clienti,newI.name];
+    setNextId(nextId+1);setNewI({name:"",amount:"",tipPlata:"OP",data:todayISO()});
+    updateData({...d});
+  };
+  const addCheltuiala=()=>{
+    if(!newC.name||!newC.amount)return;
+    const d={...data};
+    d[year][month]={...cur,cheltuieliFaraTVA:[...chFTVA,{id:nextId,name:newC.name,amount:parseFloat(newC.amount),category:newC.category,tipPlata:newC.tipPlata,data:newC.data||todayISO()}]};
+    setNextId(nextId+1);setNewC({name:"",amount:"",category:CATS_NOTVA[0]||"Salarii brute",tipPlata:"Cash",data:todayISO()});
+    updateData({...d});
+  };
+
+  const addOperatiuneCasa=()=>{
+    if(!newOpCasa.suma||!newOpCasa.explicatie)return;
+    const d={...data};
+    const amt = parseFloat(newOpCasa.suma);
+    const isTransfer = newOpCasa.numeOp==="Transfer";
+    if(isTransfer){
+      const curOps = d[year][month].operatiuniCasa||[];
+      d[year][month]={...d[year][month],operatiuniCasa:[...curOps,{id:nextId,tipOp:newOpCasa.tipOp,numeOp:"Transfer",suma:amt,data:newOpCasa.data,nrDocument:newOpCasa.nrDocument,explicatie:newOpCasa.explicatie,categorie:""}]};
+    } else if(newOpCasa.tipOp==="Incasare"){
+      const newItem={id:nextId,name:newOpCasa.explicatie,amount:amt,tipPlata:"Cash",data:newOpCasa.data,nrDocument:newOpCasa.nrDocument,tipDoc:newOpCasa.numeOp};
+      d[year][month]={...d[year][month],incasari:[...(d[year][month].incasari||[]),newItem]};
+    } else {
+      const newItem={id:nextId,name:newOpCasa.explicatie,amount:amt,tipPlata:"Cash",category:newOpCasa.categorie||"Altele",data:newOpCasa.data,nrDocument:newOpCasa.nrDocument,tipDoc:newOpCasa.numeOp};
+      d[year][month]={...d[year][month],plati:[...(d[year][month].plati||[]),newItem]};
+    }
+    setNextId(nextId+1);
+    setNewOpCasa({tipOp:"Incasare",numeOp:"Chitanta",suma:"",data:todayISO(),nrDocument:"",explicatie:"",categorie:""});
+    updateData({...d});
+  };
+
+  /* ===== DELETE with confirm ===== */
+  const removeItem=(type,id)=>{
+    if(!confirm("Esti sigur ca vrei sa stergi aceasta inregistrare?")) return;
+    const d={...data};d[year][month]={...cur,[type]:cur[type].filter(x=>x.id!==id)};updateData({...d});
+  };
+
+  const startEditItem=(type,item)=>{setEditModal({type,id:item.id,name:item.name||"",amount:String(item.amount||""),category:item.category||"",tipPlata:item.tipPlata||(type==="plati"?"OP":"OP"),data:item.data||"",nrDocument:item.nrDocument||"",tipDoc:item.tipDoc||""});};
+  const saveEditItem=()=>{
+    if(!editModal)return;
+    const {type,id}=editModal;
+    const d={...data};
+    const list=type==="plati"?cur.plati:type==="incasari"?cur.incasari:chFTVA;
+    d[year][month]={...cur,[type]:list.map(x=>{
+      if(x.id!==id)return x;
+      const updated={...x,name:editModal.name,amount:parseFloat(editModal.amount)||x.amount,tipPlata:editModal.tipPlata,data:editModal.data};
+      if(type==="plati"||type==="cheltuieliFaraTVA")updated.category=editModal.category;
+      if(editModal.nrDocument)updated.nrDocument=editModal.nrDocument;
+      if(editModal.tipDoc)updated.tipDoc=editModal.tipDoc;
+      return updated;
+    })};
+    updateData({...d});setEditModal(null);
+  };
+
+  const addFurnizor=()=>{if(!newFurn||furnizori.includes(newFurn))return;updateData({...data,furnizoriSalvati:[...furnizori,newFurn]});setNewFurn("");};
+  const addClient=()=>{if(!newCli||clienti.includes(newCli))return;updateData({...data,clientiSalvati:[...clienti,newCli]});setNewCli("");};
+  const removeFurnizor=(n)=>{if(!confirm("Stergi furnizorul "+n+"?"))return;updateData({...data,furnizoriSalvati:furnizori.filter(f=>f!==n)});};
+  const removeClient=(n)=>{if(!confirm("Stergi clientul "+n+"?"))return;updateData({...data,clientiSalvati:clienti.filter(c=>c!==n)});};
+  const disconnect=()=>{localStorage.removeItem("gestiune_url");setConnected(false);setScriptUrl("");};
+
+  const startEditContact=(type,name)=>{setEditingContact({type,name});setEditContactVal(name);};
+  const saveEditContact=()=>{
+    if(!editingContact||!editContactVal.trim())return;
+    const {type,name}=editingContact;const newName=editContactVal.trim();
+    if(newName===name){setEditingContact(null);return;}
+    const d={...data};
+    if(type==="furnizor"){d.furnizoriSalvati=furnizori.map(f=>f===name?newName:f);YEARS.forEach(y=>MONTHS.forEach(mo=>{if(d[y]?.[mo]?.plati)d[y][mo].plati=d[y][mo].plati.map(p=>p.name===name?{...p,name:newName}:p);}));}
+    else{d.clientiSalvati=clienti.map(c=>c===name?newName:c);YEARS.forEach(y=>MONTHS.forEach(mo=>{if(d[y]?.[mo]?.incasari)d[y][mo].incasari=d[y][mo].incasari.map(i=>i.name===name?{...i,name:newName}:i);}));}
+    updateData({...d});setEditingContact(null);
+  };
+
+  const addCategory=(type)=>{if(!newCatName.trim())return;const d={...data};const key=type==="tva"?"categoriiTVA":"categoriiNoTVA";if((d[key]||[]).includes(newCatName.trim()))return;d[key]=[...(d[key]||[]),newCatName.trim()];updateData({...d});setNewCatName("");};
+  const removeCategory=(type,cat)=>{if(!confirm("Stergi categoria "+cat+"?"))return;const d={...data};const key=type==="tva"?"categoriiTVA":"categoriiNoTVA";d[key]=(d[key]||[]).filter(c=>c!==cat);updateData({...d});};
+
+  const saveFirma=()=>{updateData({...data,dateFirma:{...editFirma}});setShowFirmaModal(false);};
+
+  const saveRCSold=()=>{
+    const key=`${year}_${month}`;
+    const d={...data};
+    if(!d.registruCasaSolduri) d.registruCasaSolduri={};
+    d.registruCasaSolduri[key]=parseFloat(rcSoldInitial)||0;
+    updateData({...d});
+  };
+
+  /* ===== GLOBAL SEARCH ===== */
+  const doSearch = (q) => {
+    if(!q || q.length < 2) { setSearchResults([]); return; }
+    const lower = q.toLowerCase();
+    const results = [];
+    YEARS.forEach(y => {
+      MONTHS.forEach((m, mi) => {
+        const md = data[y]?.[m];
+        if(!md) return;
+        (md.plati||[]).forEach(p => {
+          if((p.name||"").toLowerCase().includes(lower) || (p.category||"").toLowerCase().includes(lower) || String(p.amount).includes(q))
+            results.push({type:"Plata",name:p.name,amount:p.amount,category:p.category,data:p.data,year:y,month:m,tipPlata:p.tipPlata});
+        });
+        (md.incasari||[]).forEach(i => {
+          if((i.name||"").toLowerCase().includes(lower) || String(i.amount).includes(q))
+            results.push({type:"Incasare",name:i.name,amount:i.amount,data:i.data,year:y,month:m,tipPlata:i.tipPlata});
+        });
+        (md.cheltuieliFaraTVA||[]).forEach(c => {
+          if((c.name||"").toLowerCase().includes(lower) || (c.category||"").toLowerCase().includes(lower) || String(c.amount).includes(q))
+            results.push({type:"Cheltuiala fTVA",name:c.name,amount:c.amount,category:c.category,data:c.data,year:y,month:m,tipPlata:c.tipPlata});
+        });
+        (md.operatiuniCasa||[]).forEach(o => {
+          if((o.explicatie||"").toLowerCase().includes(lower) || String(o.suma).includes(q))
+            results.push({type:"Transfer Casa",name:o.explicatie,amount:o.suma,data:o.data,year:y,month:m,tipPlata:"Cash"});
+        });
+      });
+    });
+    setSearchResults(results.slice(0, 100));
+  };
+
+  const stats = useMemo(()=>{
+    const tP=cur.plati.reduce((s,p)=>s+p.amount,0);
+    const tI=cur.incasari.reduce((s,i)=>s+i.amount,0);
+    const tCH=chFTVA.reduce((s,c)=>s+c.amount,0);
+    const tvaP=cur.plati.reduce((s,p)=>s+getTva(p.amount),0);
+    const tvaI=cur.incasari.reduce((s,i)=>s+getTva(i.amount),0);
+    const bI=tI-tvaI, bP=tP-tvaP;
+    const totalCheltuieliProfit = bP + tCH;
+    const profit=bI-totalCheltuieliProfit;
+    const impozit=profit>0?profit*PROFIT_TAX:0;
+    const catMap={};cur.plati.forEach(p=>{const c=p.category||"Altele";catMap[c]=(catMap[c]||0)+Math.abs(p.amount);});
+    const catMapNoTVA={};chFTVA.forEach(c=>{const cat=c.category||"Altele fara TVA";catMapNoTVA[cat]=(catMapNoTVA[cat]||0)+Math.abs(c.amount);});
+    return{tP,tI,tCH,tvaP,tvaI,tvaDePlata:tvaI-tvaP,bI,bP,totalCheltuieliProfit,profit,impozit,profitNet:profit-impozit,catMap,catMapNoTVA};
+  },[cur,chFTVA]);
+
+  const yearStats = useMemo(()=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{tI,tP,tCH,tvaDePlata:tvaI-tvaP,profit,impozit:profit>0?profit*PROFIT_TAX:0};},[data,year]);
+
+  const topClienti = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{map[i.name]=(map[i.name]||0)+i.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
+  const topFurnizori = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.plati?.forEach(p=>{map[p.name]=(map[p.name]||0)+p.amount;});(md.cheltuieliFaraTVA||[]).forEach(c=>{map[c.name]=(map[c.name]||0)+c.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
+  const monthlyData = useMemo(()=>MONTHS.map((m)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];return{label:m.substring(0,3),v1:md.incasari.reduce((s,x)=>s+x.amount,0),v2:md.plati.reduce((s,x)=>s+x.amount,0),v3:ch.reduce((s,x)=>s+x.amount,0)};}),[data,year]);
+  const quarterlyStats = useMemo(()=>QUARTERS.map((qM,qi)=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;qM.forEach(mi=>{const m=MONTHS[mi];const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{name:Q_NAMES[qi],tI,tP,tCH,tvaI,tvaP,tvaDePlata:tvaI-tvaP,bI,bP,profit,impozit:profit>0?profit*PROFIT_TAX:0};}),[data,year]);
+
+  const alerts = useMemo(()=>{const al=[];const now=new Date();const d=now.getDate();const cm=now.getMonth();if(d>=20&&d<=25)al.push({type:"warn",text:"Termen TVA: Declaratia 300 se depune pana pe 25."});if(d>=20&&(cm===2||cm===5||cm===8||cm===11))al.push({type:"danger",text:"Termen trimestrial! Declaratia 100 (impozit profit) pana pe 25."});if(stats.tvaDePlata>5000)al.push({type:"warn",text:`TVA de plata ridicat: ${fmt(stats.tvaDePlata)} RON.`});if(stats.profitNet<0)al.push({type:"danger",text:`Profit net negativ: ${fmt(stats.profitNet)} RON.`});return al;},[stats,yearStats,data,year]);
+  const estimare = useMemo(()=>{const deficit=stats.totalCheltuieliProfit-stats.bI;return{deficit,deficitWithTVA:deficit*(1+TVA),isOnPlus:stats.profit>=0};},[stats]);
+
+  /* ===== FILTERED DATA for tables ===== */
+  const filteredPlati = useMemo(()=>{
+    let list = cur.plati;
+    if(filterPlati.category) list = list.filter(p=>(p.category||"")=== filterPlati.category);
+    if(filterPlati.tipPlata) list = list.filter(p=>(p.tipPlata||"OP")=== filterPlati.tipPlata);
+    return list;
+  },[cur.plati, filterPlati]);
+
+  const filteredIncasari = useMemo(()=>{
+    let list = cur.incasari;
+    if(filterIncasari.tipPlata) list = list.filter(i=>(i.tipPlata||"OP")=== filterIncasari.tipPlata);
+    return list;
+  },[cur.incasari, filterIncasari]);
+
+  const filteredCheltuieli = useMemo(()=>{
+    let list = chFTVA;
+    if(filterCheltuieli.category) list = list.filter(c=>(c.category||"")=== filterCheltuieli.category);
+    if(filterCheltuieli.tipPlata) list = list.filter(c=>(c.tipPlata||"Cash")=== filterCheltuieli.tipPlata);
+    return list;
+  },[chFTVA, filterCheltuieli]);
+
+  /* ===== REGISTRU DE CASA (Oblio format) ===== */
+  const registruCasa = useMemo(()=>{
+    const cashPlati = cur.plati.filter(p=>(p.tipPlata||"OP")==="Cash");
+    const cashIncasari = cur.incasari.filter(i=>(i.tipPlata||"OP")==="Cash");
+    const cashCheltuieli = chFTVA.filter(c=>(c.tipPlata||"Cash")==="Cash");
+    const allOps = [];
+    cashIncasari.forEach(i=>allOps.push({data:i.data||"",nrDoc:i.nrDocument||"",tipDoc:i.tipDoc||"Factura",explicatii:`Incasare ${i.name}`,incasare:i.amount,plata:0,id:i.id,src:"incasari"}));
+    cashPlati.forEach(p=>allOps.push({data:p.data||"",nrDoc:p.nrDocument||"",tipDoc:p.tipDoc||"Factura",explicatii:`Plata ${p.name} - ${p.category||""}`,incasare:0,plata:p.amount,id:p.id,src:"plati"}));
+    cashCheltuieli.forEach(c=>allOps.push({data:c.data||"",nrDoc:c.nrDocument||"",tipDoc:c.tipDoc||"Stat/Doc",explicatii:`${c.name} - ${c.category||""}`,incasare:0,plata:c.amount,id:c.id,src:"cheltuieli"}));
+    (cur.operatiuniCasa||[]).forEach(o=>allOps.push({
+      data:o.data||"",nrDoc:o.nrDocument||"",tipDoc:o.numeOp||"Transfer",
+      explicatii:o.explicatie||"",
+      incasare:o.tipOp==="Incasare"?o.suma:0,
+      plata:o.tipOp==="Plata"?o.suma:0,
+      id:o.id,src:"transfer"
+    }));
+    allOps.sort((a,b)=>(a.data||"").localeCompare(b.data||""));
+
+    const key=`${year}_${month}`;
+    const soldInit = (data.registruCasaSolduri||{})[key]||0;
+
+    const days = {};
+    allOps.forEach(op=>{
+      const d = op.data || "0000-00-00";
+      if(!days[d]) days[d]=[];
+      days[d].push(op);
+    });
+    const dayKeys = Object.keys(days).sort();
+    let currentSold = soldInit;
+    let nrCrt = 1;
+    const rows = [];
+
+    dayKeys.forEach(dk=>{
+      const dayOps = days[dk];
+      const daySoldInit = currentSold;
+      rows.push({type:"sold_init",data:dk==="0000-00-00"?"":dk,sold:daySoldInit,nr:nrCrt++});
+      dayOps.forEach(op=>{
+        currentSold = currentSold + op.incasare - op.plata;
+        rows.push({type:"op",...op,sold:currentSold,nr:nrCrt++});
+      });
+      rows.push({type:"sold_final",data:dk==="0000-00-00"?"":dk,sold:currentSold,nr:nrCrt++});
+    });
+
+    const totalInc = allOps.reduce((s,r)=>s+r.incasare,0);
+    const totalPl = allOps.reduce((s,r)=>s+r.plata,0);
+    return {rows, soldInit, soldFinal:currentSold, totalInc, totalPl, dayCount:dayKeys.length, opsCount:allOps.length};
+  },[cur,chFTVA,data,year,month]);
+
+  useEffect(()=>{
+    const key=`${year}_${month}`;
+    setRcSoldInitial(String((data.registruCasaSolduri||{})[key]||0));
+  },[year,month,data.registruCasaSolduri]);
+
+  /* Period display */
+  const mIdx = monthIndex(month);
+  const periodStart = `01.${String(mIdx+1).padStart(2,"0")}.${year}`;
+  const periodEnd = `${daysInMonth(year,month)}.${String(mIdx+1).padStart(2,"0")}.${year}`;
+
+  const exportCSV=()=>{let c=`Gestiune Financiara - ${month} ${year}\n\nPLATI (cu TVA)\nFurnizor,Total cu TVA,Baza,TVA 21%,Categorie,Tip Plata\n`;cur.plati.forEach(p=>{c+=`"${p.name}",${p.amount.toFixed(2)},${getBase(p.amount).toFixed(2)},${getTva(p.amount).toFixed(2)},"${p.category||""}","${p.tipPlata||"OP"}"\n`;});c+=`\nINCASARI\nClient,Total cu TVA,Baza,TVA 21%,Tip Plata\n`;cur.incasari.forEach(i=>{c+=`"${i.name}",${i.amount.toFixed(2)},${getBase(i.amount).toFixed(2)},${getTva(i.amount).toFixed(2)},"${i.tipPlata||"OP"}"\n`;});const blob=new Blob(["\uFEFF"+c],{type:"text/csv;charset=utf-8;"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`gestiune_${month}_${year}.csv`;a.click();};
+
+  /* ===== EXPORT EXCEL (.xlsx) ===== */
+  const exportExcel = () => {
+    if(typeof XLSX === "undefined") { alert("Libraria SheetJS nu s-a incarcat. Reincarca pagina."); return; }
+    const wb = XLSX.utils.book_new();
+
+    /* Sheet 1: Plati */
+    const platiData = [["#","Furnizor","Suma cu TVA","Baza","TVA 21%","Categorie","Tip Plata","Data"]];
+    cur.plati.forEach((p,i) => platiData.push([i+1, p.name, p.amount, getBase(p.amount), getTva(p.amount), p.category||"", p.tipPlata||"OP", fmtDate(p.data)]));
+    platiData.push(["","TOTAL",stats.tP,stats.bP,stats.tvaP,"","",""]);
+    const ws1 = XLSX.utils.aoa_to_sheet(platiData);
+    XLSX.utils.book_append_sheet(wb, ws1, "Plati");
+
+    /* Sheet 2: Incasari */
+    const incData = [["#","Client","Suma cu TVA","Baza","TVA 21%","Tip Plata","Data"]];
+    cur.incasari.forEach((i,idx) => incData.push([idx+1, i.name, i.amount, getBase(i.amount), getTva(i.amount), i.tipPlata||"OP", fmtDate(i.data)]));
+    incData.push(["","TOTAL",stats.tI,stats.bI,stats.tvaI,"",""]);
+    const ws2 = XLSX.utils.aoa_to_sheet(incData);
+    XLSX.utils.book_append_sheet(wb, ws2, "Incasari");
+
+    /* Sheet 3: Cheltuieli fara TVA */
+    const chData = [["#","Descriere","Suma","Categorie","Tip Plata","Data"]];
+    chFTVA.forEach((c,i) => chData.push([i+1, c.name, c.amount, c.category||"", c.tipPlata||"Cash", fmtDate(c.data)]));
+    chData.push(["","TOTAL",stats.tCH,"","",""]);
+    const ws3 = XLSX.utils.aoa_to_sheet(chData);
+    XLSX.utils.book_append_sheet(wb, ws3, "Cheltuieli fara TVA");
+
+    /* Sheet 4: Sumar */
+    const sumData = [
+      ["Raport Financiar",month,year],
+      [],
+      ["Indicator","Valoare (RON)"],
+      ["Incasari (cu TVA)",stats.tI],
+      ["Plati facturi (cu TVA)",stats.tP],
+      ["Cheltuieli fara TVA",stats.tCH],
+      ["TVA Incasat",stats.tvaI],
+      ["TVA Platit",stats.tvaP],
+      ["TVA de plata",stats.tvaDePlata],
+      ["Profit brut",stats.profit],
+      ["Impozit profit (16%)",stats.impozit],
+      ["Profit net",stats.profitNet],
+    ];
+    const ws4 = XLSX.utils.aoa_to_sheet(sumData);
+    XLSX.utils.book_append_sheet(wb, ws4, "Sumar");
+
+    /* Sheet 5: Anual */
+    const anualData = [["Luna","Incasari","Plati","Ch. fTVA","TVA","Profit"]];
+    MONTHS.forEach(m => {
+      const md = data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};
+      const ch = md.cheltuieliFaraTVA||[];
+      const inc = md.incasari.reduce((s,x)=>s+x.amount,0);
+      const pl = md.plati.reduce((s,x)=>s+x.amount,0);
+      const tCH = ch.reduce((s,x)=>s+x.amount,0);
+      const tI = md.incasari.reduce((s,x)=>s+getTva(x.amount),0);
+      const tP = md.plati.reduce((s,x)=>s+getTva(x.amount),0);
+      const pr = (inc-tI)-(pl-tP)-tCH;
+      anualData.push([m, inc, pl, tCH, tI-tP, pr]);
+    });
+    anualData.push(["TOTAL",yearStats.tI,yearStats.tP,yearStats.tCH,yearStats.tvaDePlata,yearStats.profit]);
+    const ws5 = XLSX.utils.aoa_to_sheet(anualData);
+    XLSX.utils.book_append_sheet(wb, ws5, "Anual "+year);
+
+    XLSX.writeFile(wb, `gestiune_${month}_${year}.xlsx`);
+  };
+
+  const backupJSON=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`gestiune_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();};
+  const restoreJSON=(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(ev)=>{try{const r=JSON.parse(ev.target.result);if(r&&typeof r==="object"){const m={...emptyData(),...r};if(!m.dateFirma)m.dateFirma={...DEFAULT_FIRMA};setData(m);triggerSave(m);alert("Date restaurate!");}else{alert("Fisier invalid.");}}catch(err){alert("Eroare: "+err.message);}};reader.readAsText(file);e.target.value="";};
+  const printReport=()=>window.print();
+
+  if(!connected) return <SetupWizard onConnect={handleConnect}/>;
+
+  const saveLabel={idle:"",pending:"⏳",saving:"💾 Se salveaza...",saved:"✅ Salvat",error:"❌ Eroare"};
+  const maxCat=Math.max(...Object.values(stats.catMap),1);
+  const maxCatNT=Math.max(...Object.values(stats.catMapNoTVA),1);
+  const TABS=[["dashboard","📊 Dashboard"],["plati","📤 Plati (TVA)"],["cheltuieli","💼 Ch. fara TVA"],["incasari","📥 Incasari"],["registru","📒 Registru Casa"],["grafice","📈 Grafice"],["trimestrial","📋 Trimestrial"],["rapoarte","🖨 Rapoarte"],["contacte","👥 Contacte"],["anual","📅 Anual"]];
+
+  const TipPlataBadge=({tip})=><span className={tip==="Cash"?"badge badge-cash":"badge badge-op"}>{tip==="Cash"?"💵 Cash":"🏦 OP"}</span>;
+
+  return (
+    <div>
+      <div className="no-print" style={{background:"var(--header-bg)",color:"#fff",padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+        <div>
+          <div style={{fontSize:20,fontWeight:800}}>📊 {firma.nume||"Gestiune Financiara"}</div>
+          <div style={{fontSize:12,opacity:0.8}}>CUI: {firma.cui} · TVA 21% · Impozit 16%{saveLabel[saveStatus]&&<span style={{marginLeft:12,background:"rgba(255,255,255,0.2)",padding:"2px 10px",borderRadius:10,fontSize:11}}>{saveLabel[saveStatus]}</span>}</div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <button className="btn" onClick={()=>{setShowSearch(true);setSearchQuery("");setSearchResults([]);}} style={{background:"rgba(255,255,255,0.15)",padding:"8px 14px",fontSize:13}}>🔍 Cauta</button>
+          <select value={year} onChange={e=>setYear(+e.target.value)} style={{padding:"8px 12px",borderRadius:8,border:"none",fontSize:14,fontWeight:600}}>{YEARS.map(y=><option key={y} value={y}>{y}</option>)}</select>
+          <select value={month} onChange={e=>setMonth(e.target.value)} style={{padding:"8px 12px",borderRadius:8,border:"none",fontSize:14,fontWeight:600,minWidth:120}}>{MONTHS.map(m=><option key={m} value={m}>{m}</option>)}</select>
+          <button className="btn" onClick={exportCSV} style={{background:"#059669"}}>⬇ CSV</button>
+          <button className="btn" onClick={exportExcel} style={{background:"#1d6f42"}}>⬇ Excel</button>
+          <button className="btn" onClick={()=>setDarkMode(!darkMode)} style={{background:"transparent",border:"1px solid rgba(255,255,255,0.3)",padding:"8px 12px",fontSize:16}}>{darkMode?"☀️":"🌙"}</button>
+          <button className="btn" onClick={()=>setShowSettings(true)} style={{background:"rgba(255,255,255,0.15)",fontSize:12,padding:"8px 12px"}}>⚙</button>
+        </div>
+      </div>
+
+      <div className="print-only" style={{padding:"10px 20px",borderBottom:"2px solid #000"}}><h1 style={{fontSize:18,fontWeight:800,margin:0}}>📊 {firma.nume} — {month} {year}</h1><p style={{fontSize:11,color:"#666",margin:"4px 0 0"}}>CUI: {firma.cui} · {firma.regCom} · Generat: {new Date().toLocaleDateString("ro-RO")}</p></div>
+
+      {alerts.length>0&&tab==="dashboard"&&<div className="no-print" style={{padding:"14px 28px 0"}}>{alerts.map((a,i)=><div key={i} className={`alert-card alert-${a.type}`}><span style={{marginRight:8}}>{a.type==="warn"?"⚠️":a.type==="danger"?"🚨":"ℹ️"}</span>{a.text}</div>)}</div>}
+
+      <div className="no-print" style={{padding:"14px 28px 0",display:"flex",gap:6,flexWrap:"wrap"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
+
+      <div className="main-content" style={{padding:"18px 28px 40px",maxWidth:1200}}>
+
+        {/* DASHBOARD */}
+        {tab==="dashboard"&&<div>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Incasari (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tI)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Plati facturi (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tP)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cheltuieli fara TVA</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(stats.tCH)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cash Flow</div><div style={{fontSize:22,fontWeight:700,color:(stats.tI-stats.tP-stats.tCH)>=0?"var(--green)":"var(--red)"}}>{fmt(stats.tI-stats.tP-stats.tCH)} RON</div></div>
+          </div>
+          <div className="card" style={{borderColor:estimare.isOnPlus?"var(--green)":"var(--red)",borderWidth:2,marginBottom:18}}>
+            <div className="card-header">{estimare.isOnPlus?"✅ Firma este pe PLUS":"⚠️ Estimare — cat mai trebuie incasat"}</div>
+            <div className="card-body">{estimare.isOnPlus?<div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:32}}>🎉</div><div><div style={{fontWeight:600,color:"var(--green)",fontSize:16}}>Profit net: {fmt(stats.profitNet)} RON</div><div style={{fontSize:13,color:"var(--text2)"}}>Firma e pe plus luna aceasta.</div></div></div>:<div><div style={{display:"flex",gap:20,flexWrap:"wrap"}}><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Deficit (fara TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--red)"}}>{fmt(Math.abs(estimare.deficit))} RON</div></div><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Min de incasat (cu TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--orange)"}}>{fmt(Math.abs(estimare.deficitWithTVA))} RON</div></div></div></div>}</div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
+            <div className="card" style={{borderColor:"var(--yellow)",borderWidth:2}}><div className="card-header">🧾 TVA</div><div className="card-body"><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Incasat</div><div style={{fontSize:20,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tvaI)}</div></div><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Platit</div><div style={{fontSize:20,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tvaP)}</div></div></div><div style={{borderTop:"1px solid var(--border)",marginTop:12,paddingTop:12,display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600}}>TVA de plata:</span><span style={{fontSize:22,fontWeight:800,color:stats.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(stats.tvaDePlata)} RON</span></div></div></div>
+            <div className="card" style={{borderColor:"var(--purple)",borderWidth:2}}><div className="card-header">📊 Impozit pe Profit</div><div className="card-body"><div style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Venituri (fara TVA):</span><span style={{fontWeight:600,color:"var(--green)"}}>{fmt(stats.bI)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli facturi (fara TVA):</span><span style={{fontWeight:600,color:"var(--red)"}}>-{fmt(stats.bP)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli fara TVA:</span><span style={{fontWeight:600,color:"var(--orange)"}}>-{fmt(stats.tCH)}</span></div></div><div style={{borderTop:"1px solid var(--border)",paddingTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Profit brut:</span><span style={{fontWeight:700,color:stats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Impozit (16%):</span><span style={{fontWeight:700,color:"var(--red)"}}>{fmt(stats.impozit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",borderTop:"2px solid var(--purple)",paddingTop:8}}><span style={{fontWeight:700}}>Profit net:</span><span style={{fontSize:20,fontWeight:800,color:stats.profitNet>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profitNet)} RON</span></div></div></div></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+            {Object.keys(stats.catMap).length>0&&<div className="card"><div className="card-header">📂 Cheltuieli cu TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCat)*100+"%"}}/></div></div>)}</div></div>}
+            {Object.keys(stats.catMapNoTVA).length>0&&<div className="card"><div className="card-header">💼 Cheltuieli fara TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMapNoTVA).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCatNT)*100+"%",background:"linear-gradient(90deg,var(--yellow),var(--orange))"}}/></div></div>)}</div></div>}
+          </div>
+        </div>}
+
+        {/* PLATI */}
+        {tab==="plati"&&<div className="card"><div className="card-header">📤 Plati Furnizori (cu TVA) — {month} {year}</div><div className="card-body">
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
+            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Furnizor</label><input className="input" list="fl" value={newP.name} onChange={e=>setNewP({...newP,name:e.target.value})} placeholder="Furnizor" onKeyDown={e=>e.key==="Enter"&&addPlata()}/><datalist id="fl">{furnizori.map(f=><option key={f} value={f}/>)}</datalist></div>
+            <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newP.amount} onChange={e=>setNewP({...newP,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addPlata()}/></div>
+            <div style={{flex:1,minWidth:120}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><select className="input" value={newP.category} onChange={e=>setNewP({...newP,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>
+            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newP.tipPlata} onChange={e=>setNewP({...newP,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+            <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newP.data} onChange={e=>setNewP({...newP,data:e.target.value})}/></div>
+            <button className="btn" onClick={addPlata} style={{background:"var(--blue)"}}>+ Adauga</button>
+          </div>
+          {/* Filtre */}
+          <div className="no-print filter-row">
+            <label>Filtre:</label>
+            <select value={filterPlati.category} onChange={e=>setFilterPlati({...filterPlati,category:e.target.value})}><option value="">Toate categoriile</option>{CATS.map(c=><option key={c} value={c}>{c}</option>)}</select>
+            <select value={filterPlati.tipPlata} onChange={e=>setFilterPlati({...filterPlati,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select>
+            {(filterPlati.category||filterPlati.tipPlata)&&<button onClick={()=>setFilterPlati({category:"",tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
+            {(filterPlati.category||filterPlati.tipPlata)&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredPlati.length} din {cur.plati.length})</span>}
+          </div>
+          <div style={{overflowX:"auto"}}><table>
+            <thead><tr><th style={{width:30}}>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
+            <tbody>{filteredPlati.map((p,i)=><tr key={p.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{p.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(p.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(p.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(p.amount))}</td><td><span className="badge">{p.category}</span></td><td><TipPlataBadge tip={p.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(p.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("plati",p)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("plati",p.id)}>×</button></td></tr>)}</tbody>
+            {filteredPlati.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--blue)",background:"var(--blue-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+p.amount,0))}</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+getBase(p.amount),0))}</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+getTva(p.amount),0))}</td><td colSpan={4}></td></tr></tfoot>}
+          </table></div>
+          {filteredPlati.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{cur.plati.length===0?"Nicio plata inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
+        </div></div>}
+
+        {/* CHELTUIELI FARA TVA */}
+        {tab==="cheltuieli"&&<div className="card" style={{borderColor:"var(--orange)",borderWidth:2}}><div className="card-header">💼 Cheltuieli fara TVA — {month} {year}</div><div className="card-body">
+          <div className="no-print" style={{background:"var(--yellow-bg)",border:"1px solid var(--yellow)",borderRadius:8,padding:"10px 14px",marginBottom:14,fontSize:13}}>Cheltuieli <b>fara TVA</b>: salarii, contributii, amortizari, taxe. Se scad din profit dar <b>NU afecteaza TVA-ul</b>.</div>
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
+            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Descriere</label><input className="input" value={newC.name} onChange={e=>setNewC({...newC,name:e.target.value})} placeholder="Ex: Salarii aprilie" onKeyDown={e=>e.key==="Enter"&&addCheltuiala()}/></div>
+            <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma (RON)</label><input className="input" type="number" value={newC.amount} onChange={e=>setNewC({...newC,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addCheltuiala()}/></div>
+            <div style={{flex:1,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><select className="input" value={newC.category} onChange={e=>setNewC({...newC,category:e.target.value})}>{CATS_NOTVA.map(c=><option key={c}>{c}</option>)}</select></div>
+            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newC.tipPlata} onChange={e=>setNewC({...newC,tipPlata:e.target.value})}><option value="Cash">💵 Cash</option><option value="OP">🏦 OP</option></select></div>
+            <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data</label><input className="input" type="date" value={newC.data} onChange={e=>setNewC({...newC,data:e.target.value})}/></div>
+            <button className="btn" onClick={addCheltuiala} style={{background:"var(--orange)"}}>+ Adauga</button>
+          </div>
+          {/* Filtre */}
+          <div className="no-print filter-row">
+            <label>Filtre:</label>
+            <select value={filterCheltuieli.category} onChange={e=>setFilterCheltuieli({...filterCheltuieli,category:e.target.value})}><option value="">Toate categoriile</option>{CATS_NOTVA.map(c=><option key={c} value={c}>{c}</option>)}</select>
+            <select value={filterCheltuieli.tipPlata} onChange={e=>setFilterCheltuieli({...filterCheltuieli,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="Cash">💵 Cash</option><option value="OP">🏦 OP</option></select>
+            {(filterCheltuieli.category||filterCheltuieli.tipPlata)&&<button onClick={()=>setFilterCheltuieli({category:"",tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
+            {(filterCheltuieli.category||filterCheltuieli.tipPlata)&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredCheltuieli.length} din {chFTVA.length})</span>}
+          </div>
+          <div style={{overflowX:"auto"}}><table>
+            <thead><tr><th style={{width:30}}>#</th><th>Descriere</th><th style={{textAlign:"right"}}>Suma</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
+            <tbody>{filteredCheltuieli.map((c,i)=><tr key={c.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{c.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(c.amount)}</td><td><span className="badge" style={{background:"var(--yellow-bg)"}}>{c.category}</span></td><td><TipPlataBadge tip={c.tipPlata||"Cash"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(c.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("cheltuieliFaraTVA",c)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("cheltuieliFaraTVA",c.id)}>×</button></td></tr>)}</tbody>
+            {filteredCheltuieli.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--orange)",background:"var(--yellow-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredCheltuieli.reduce((s,c)=>s+c.amount,0))}</td><td colSpan={4}></td></tr></tfoot>}
+          </table></div>
+          {filteredCheltuieli.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{chFTVA.length===0?"Nicio cheltuiala fara TVA inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
+        </div></div>}
+
+        {/* INCASARI */}
+        {tab==="incasari"&&<div className="card"><div className="card-header">📥 Incasari Clienti — {month} {year}</div><div className="card-body">
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
+            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Client</label><input className="input" list="cl" value={newI.name} onChange={e=>setNewI({...newI,name:e.target.value})} placeholder="Client" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/><datalist id="cl">{clienti.map(c=><option key={c} value={c}/>)}</datalist></div>
+            <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newI.amount} onChange={e=>setNewI({...newI,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/></div>
+            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newI.tipPlata} onChange={e=>setNewI({...newI,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+            <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newI.data} onChange={e=>setNewI({...newI,data:e.target.value})}/></div>
+            <button className="btn" onClick={addIncasare} style={{background:"var(--green)"}}>+ Adauga</button>
+          </div>
+          {/* Filtre */}
+          <div className="no-print filter-row">
+            <label>Filtre:</label>
+            <select value={filterIncasari.tipPlata} onChange={e=>setFilterIncasari({...filterIncasari,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select>
+            {filterIncasari.tipPlata&&<button onClick={()=>setFilterIncasari({tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
+            {filterIncasari.tipPlata&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredIncasari.length} din {cur.incasari.length})</span>}
+          </div>
+          <div style={{overflowX:"auto"}}><table>
+            <thead><tr><th style={{width:30}}>#</th><th>Client</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
+            <tbody>{filteredIncasari.map((inc,i)=><tr key={inc.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{inc.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(inc.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(inc.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(inc.amount))}</td><td><TipPlataBadge tip={inc.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(inc.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("incasari",inc)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("incasari",inc.id)}>×</button></td></tr>)}</tbody>
+            {filteredIncasari.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--green)",background:"var(--green-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+i.amount,0))}</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+getBase(i.amount),0))}</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+getTva(i.amount),0))}</td><td colSpan={3}></td></tr></tfoot>}
+          </table></div>
+          {filteredIncasari.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{cur.incasari.length===0?"Nicio incasare inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
+        </div></div>}
+
+        {/* ============ REGISTRU DE CASA (format Oblio) ============ */}
+        {tab==="registru"&&<div>
+          {/* Controls */}
+          <div className="no-print" style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
+            <div style={{minWidth:200}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Sold initial casa ({month})</label>
+              <div style={{display:"flex",gap:6}}><input className="input" type="number" value={rcSoldInitial} onChange={e=>setRcSoldInitial(e.target.value)} placeholder="0.00" step="0.01"/><button className="btn" onClick={saveRCSold} style={{background:"var(--blue)",padding:"8px 14px"}}>💾</button></div>
+            </div>
+            <button className="btn" onClick={()=>setShowOpCasaForm(!showOpCasaForm)} style={{background:"var(--green)"}}>{showOpCasaForm?"✕ Inchide":"$ Adauga Operatiune Casa"}</button>
+            <button className="btn" onClick={printReport} style={{background:"var(--purple)"}}>🖨 Printeaza Registru</button>
+          </div>
+
+          {/* Add Operation Form */}
+          {showOpCasaForm&&<div className="no-print card" style={{marginBottom:16,borderColor:"var(--green)",borderWidth:2}}>
+            <div className="card-header" style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span>$ Adauga Operatiune Casa</span>
+              <button onClick={()=>setShowOpCasaForm(false)} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"var(--text)"}}>✕</button>
+            </div>
+            <div className="card-body">
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip Operatiune</label>
+                  <select className="input" value={newOpCasa.tipOp} onChange={e=>setNewOpCasa({...newOpCasa,tipOp:e.target.value})}>
+                    <option value="Incasare">{newOpCasa.numeOp==="Transfer"?"Incasare (banca → casa)":"Incasare"}</option>
+                    <option value="Plata">{newOpCasa.numeOp==="Transfer"?"Plata (casa → banca)":"Plata"}</option>
+                  </select>
+                  {newOpCasa.numeOp==="Transfer"&&<div style={{fontSize:11,color:"var(--blue)",marginTop:4,fontStyle:"italic"}}>Transfer intern — nu se inregistreaza la plati/incasari</div>}
+                </div>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie (optional)</label>
+                  <select className="input" value={newOpCasa.categorie} onChange={e=>setNewOpCasa({...newOpCasa,categorie:e.target.value})}>
+                    <option value="">Categoria</option>
+                    {CATS.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Nume operatiune</label>
+                  <select className="input" value={newOpCasa.numeOp} onChange={e=>setNewOpCasa({...newOpCasa,numeOp:e.target.value})}>
+                    {TIP_DOC_OPTIONS.map(t=><option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data*</label>
+                  <input className="input" type="date" value={newOpCasa.data} onChange={e=>setNewOpCasa({...newOpCasa,data:e.target.value})}/>
+                </div>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma*</label>
+                  <div style={{display:"flex",gap:6,alignItems:"center"}}><input className="input" type="number" value={newOpCasa.suma} onChange={e=>setNewOpCasa({...newOpCasa,suma:e.target.value})} placeholder="0.00" step="0.01"/><span style={{fontWeight:600,color:"var(--text2)",whiteSpace:"nowrap"}}>RON</span></div>
+                </div>
+                <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Nr. document</label>
+                  <input className="input" value={newOpCasa.nrDocument} onChange={e=>setNewOpCasa({...newOpCasa,nrDocument:e.target.value})} placeholder="Nr. document"/>
+                </div>
+              </div>
+              <div style={{marginTop:12}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Explicatie*</label>
+                <input className="input" value={newOpCasa.explicatie} onChange={e=>setNewOpCasa({...newOpCasa,explicatie:e.target.value})} placeholder="Ex: plata factura a580769 SELECT AUTO SRL" onKeyDown={e=>e.key==="Enter"&&addOperatiuneCasa()}/>
+              </div>
+              <div style={{marginTop:14,textAlign:"right"}}><button className="btn" onClick={addOperatiuneCasa} style={{background:"var(--green)",padding:"12px 28px"}}>Adauga Operatiune Casa</button></div>
+            </div>
+          </div>}
+
+          {/* Oblio-style Registru de Casa */}
+          <div className="rc-oblio-wrap" style={{border:"1px solid #ddd",borderRadius:4,overflow:"hidden"}}>
+            <div className="rc-oblio-company">
+              <strong>{firma.nume}</strong>
+              <div>{firma.cui}</div>
+              <div>{firma.sediu}, {firma.localitate?.split(",")[0]?.replace("JUD. NEAMT, ","")?.trim()||"Pildesti"}</div>
+              <div>Sediu</div>
+            </div>
+            <div className="rc-oblio-title-wrap">
+              <div className="rc-oblio-title">Raport registru casa</div>
+              <div className="rc-oblio-period">{periodStart} - {periodEnd}</div>
+            </div>
+            <table className="rc-oblio-table">
+              <thead>
+                <tr>
+                  <th style={{width:45}}>Nr.<br/>crt.</th>
+                  <th style={{width:85}}>Data</th>
+                  <th style={{width:120}}>Document</th>
+                  <th style={{width:110}}>Tip document</th>
+                  <th>Explicatie</th>
+                  <th style={{width:95,textAlign:"right"}}>Incasari</th>
+                  <th style={{width:95,textAlign:"right"}}>Plati</th>
+                  <th style={{width:100,textAlign:"right"}}>Sold</th>
+                  <th className="no-print" style={{width:35}}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {registruCasa.rows.length===0&&<tr><td colSpan={9} style={{textAlign:"center",padding:30,color:"#999"}}>Nu sunt operatiuni cash luna aceasta.<br/>Adauga plati/incasari cu tip "Cash" sau operatiuni manuale.</td></tr>}
+                {registruCasa.rows.map((r,i)=>{
+                  if(r.type==="sold_init"){
+                    return <tr key={`si-${i}`} className="rc-sold-row"><td style={{textAlign:"center"}}>{r.nr}</td><td></td><td></td><td></td><td>Sold initial {fmtDate(r.data)}</td><td></td><td></td><td style={{textAlign:"right",fontWeight:700}}>{fmt(r.sold)}<br/><span style={{fontSize:10,color:"#666"}}>RON</span></td><td className="no-print"></td></tr>;
+                  }
+                  if(r.type==="sold_final"){
+                    return <tr key={`sf-${i}`} className="rc-sold-row"><td style={{textAlign:"center"}}>{r.nr}</td><td></td><td></td><td></td><td>Sold final {fmtDate(r.data)}</td><td></td><td></td><td style={{textAlign:"right",fontWeight:700}}>{fmt(r.sold)}<br/><span style={{fontSize:10,color:"#666"}}>RON</span></td><td className="no-print"></td></tr>;
+                  }
+                  const delOp=()=>{
+                    if(!confirm("Esti sigur ca vrei sa stergi aceasta operatiune din registru?")) return;
+                    if(r.src==="plati")removeItem("plati",r.id);
+                    else if(r.src==="incasari")removeItem("incasari",r.id);
+                    else if(r.src==="cheltuieli")removeItem("cheltuieliFaraTVA",r.id);
+                    else if(r.src==="transfer"){const d={...data};d[year][month]={...d[year][month],operatiuniCasa:(d[year][month].operatiuniCasa||[]).filter(o=>o.id!==r.id)};updateData({...d});}
+                  };
+                  return <tr key={r.id||i}>
+                    <td style={{textAlign:"center"}}>{r.nr}</td>
+                    <td>{fmtDate(r.data)}</td>
+                    <td style={{fontSize:11}}>{r.nrDoc||""}</td>
+                    <td style={{fontSize:11}}>{r.tipDoc}</td>
+                    <td>{r.explicatii}</td>
+                    <td style={{textAlign:"right",color:r.incasare>0?"#059669":""}}>{r.incasare>0?<>{fmt(r.incasare)}<br/><span style={{fontSize:10,color:"#666"}}>RON</span></>:""}</td>
+                    <td style={{textAlign:"right",color:r.plata>0?"#dc2626":""}}>{r.plata>0?<>-{fmt(r.plata)}<br/><span style={{fontSize:10,color:"#666"}}>RON</span></>:""}</td>
+                    <td style={{textAlign:"right",fontWeight:600}}>{fmt(r.sold)}<br/><span style={{fontSize:10,color:"#666"}}>RON</span></td>
+                    <td className="no-print"><button className="remove-btn" onClick={delOp} title="Sterge operatiunea">×</button></td>
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+            <div className="rc-oblio-footer">Intocmit de {firma.administrator}</div>
+            <div className="rc-oblio-page">Pagina 1 din 1</div>
+          </div>
+        </div>}
+
+        {/* GRAFICE */}
+        {tab==="grafice"&&<div>
+          <div className="card"><div className="card-header">📈 Evolutie Lunara — {year}</div><div className="card-body"><BarChart dataPoints={monthlyData} labels={["Incasari","Plati TVA","Ch. fara TVA"]} barColor1="var(--green)" barColor2="var(--red)" barColor3="var(--orange)"/></div></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+            <div className="card"><div className="card-header">💰 Profit Lunar — {year}</div><div className="card-body"><svg viewBox="0 0 700 250" style={{width:"100%",maxWidth:700,height:"auto"}}>{(()=>{const profits=MONTHS.map(m=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];const inc=md.incasari.reduce((s,x)=>s+x.amount,0);const pl=md.plati.reduce((s,x)=>s+x.amount,0);const tCH=ch.reduce((s,x)=>s+x.amount,0);const tI=md.incasari.reduce((s,x)=>s+getTva(x.amount),0);const tP=md.plati.reduce((s,x)=>s+getTva(x.amount),0);return(inc-tI)-(pl-tP)-tCH;});const mx=Math.max(...profits.map(Math.abs),1);const cH=180,sX=60,stp=53,mY=20+cH/2;return <><line x1={sX} y1={mY} x2={680} y2={mY} stroke="var(--border)" strokeWidth="1"/><text x={sX-8} y={mY+4} textAnchor="end" fill="var(--text2)" fontSize="10">0</text>{profits.map((p,i)=>{const x=sX+i*stp+stp/2;const h=Math.abs(p)/mx*(cH/2);const y=p>=0?mY-h:mY;return <g key={i}><rect x={x-8} y={y} width={16} height={h} fill={p>=0?"var(--green)":"var(--red)"} rx="2"/><text x={x} y={240} textAnchor="middle" fill="var(--text2)" fontSize="9">{MONTHS[i].substring(0,3)}</text></g>;})}</>;})()}</svg></div></div>
+            <div className="card"><div className="card-header">🧾 TVA Lunar — {year}</div><div className="card-body"><svg viewBox="0 0 700 250" style={{width:"100%",maxWidth:700,height:"auto"}}>{(()=>{const tvas=MONTHS.map(m=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};return md.incasari.reduce((s,x)=>s+getTva(x.amount),0)-md.plati.reduce((s,x)=>s+getTva(x.amount),0);});const mx=Math.max(...tvas.map(Math.abs),1);const cH=180,sX=60,stp=53,mY=20+cH/2;return <><line x1={sX} y1={mY} x2={680} y2={mY} stroke="var(--border)" strokeWidth="1"/><text x={sX-8} y={mY+4} textAnchor="end" fill="var(--text2)" fontSize="10">0</text>{tvas.map((t,i)=>{const x=sX+i*stp+stp/2;const h=Math.abs(t)/mx*(cH/2);const y=t>=0?mY-h:mY;return <g key={i}><rect x={x-8} y={y} width={16} height={h} fill={t>=0?"var(--yellow)":"var(--green)"} rx="2"/><text x={x} y={240} textAnchor="middle" fill="var(--text2)" fontSize="9">{MONTHS[i].substring(0,3)}</text></g>;})}</>;})()}</svg></div></div>
+          </div>
+        </div>}
+
+        {/* TRIMESTRIAL */}
+        {tab==="trimestrial"&&<div>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>{quarterlyStats.map((q,i)=><div key={i} className="stat" style={{minWidth:220}}><div style={{fontSize:13,fontWeight:700,marginBottom:8,color:"var(--blue)"}}>{q.name}</div><div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}><span style={{color:"var(--text2)"}}>Incasari:</span><span style={{color:"var(--green)",fontWeight:600}}>{fmt(q.tI)}</span></div><div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}><span style={{color:"var(--text2)"}}>Plati:</span><span style={{color:"var(--red)",fontWeight:600}}>{fmt(q.tP)}</span></div><div style={{borderTop:"1px solid var(--border)",paddingTop:6,marginTop:6}}><div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}}><span style={{color:"var(--text2)"}}>TVA:</span><span style={{fontWeight:700,color:q.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(q.tvaDePlata)}</span></div><div style={{display:"flex",justifyContent:"space-between",fontSize:12}}><span style={{color:"var(--text2)"}}>Impozit:</span><span style={{fontWeight:700,color:"var(--purple)"}}>{fmt(q.impozit)}</span></div></div></div>)}</div>
+          <div className="card"><div className="card-header">📋 Sumar Trimestrial — {year}</div><div className="card-body" style={{overflowX:"auto"}}><table><thead><tr><th>Trimestru</th><th style={{textAlign:"right"}}>Venituri</th><th style={{textAlign:"right"}}>Cheltuieli</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"right"}}>Impozit</th><th style={{textAlign:"right"}}>TVA</th></tr></thead><tbody>{quarterlyStats.map((q,i)=><tr key={i}><td style={{fontWeight:600}}>{q.name}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(q.bI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(q.bP+q.tCH)}</td><td style={{textAlign:"right",fontWeight:700,color:q.profit>=0?"var(--green)":"var(--red)"}}>{fmt(q.profit)}</td><td style={{textAlign:"right",color:"var(--purple)"}}>{fmt(q.impozit)}</td><td style={{textAlign:"right",color:q.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(q.tvaDePlata)}</td></tr>)}</tbody></table></div></div>
+        </div>}
+
+        {/* RAPOARTE */}
+        {tab==="rapoarte"&&<div>
+          <div className="no-print" style={{display:"flex",gap:10,marginBottom:18}}><button className="btn" onClick={printReport} style={{background:"var(--blue)"}}>🖨 Printeaza</button><button className="btn" onClick={exportCSV} style={{background:"var(--green)"}}>⬇ CSV</button><button className="btn" onClick={exportExcel} style={{background:"#1d6f42"}}>⬇ Excel</button></div>
+          <div className="card"><div className="card-header">🖨 Raport — {month} {year}</div><div className="card-body">
+            <h3 style={{fontSize:16,fontWeight:700,marginBottom:16,textAlign:"center"}}>{firma.nume} — Raport Financiar {month} {year}</h3>
+            <table style={{fontSize:14}}><tbody>
+              <tr><td style={{fontWeight:600,padding:"12px"}}>Incasari (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--green)",padding:"12px"}}>{fmt(stats.tI)} RON</td></tr>
+              <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"12px"}}>Plati facturi (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--red)",padding:"12px"}}>{fmt(stats.tP)} RON</td></tr>
+              <tr><td style={{fontWeight:600,padding:"12px"}}>Cheltuieli fara TVA</td><td style={{textAlign:"right",fontWeight:700,color:"var(--orange)",padding:"12px"}}>{fmt(stats.tCH)} RON</td></tr>
+              <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"12px"}}>TVA Incasat</td><td style={{textAlign:"right",fontWeight:700,padding:"12px"}}>{fmt(stats.tvaI)} RON</td></tr>
+              <tr><td style={{fontWeight:600,padding:"12px"}}>TVA Platit</td><td style={{textAlign:"right",fontWeight:700,padding:"12px"}}>{fmt(stats.tvaP)} RON</td></tr>
+              <tr style={{borderTop:"2px solid var(--border)",background:"var(--yellow-bg)"}}><td style={{fontWeight:700,padding:"14px",fontSize:15}}>TVA de plata</td><td style={{textAlign:"right",fontWeight:700,color:stats.tvaDePlata>0?"var(--red)":"var(--green)",padding:"14px",fontSize:15}}>{fmt(stats.tvaDePlata)} RON</td></tr>
+              <tr><td style={{fontWeight:600,padding:"12px"}}>Profit brut</td><td style={{textAlign:"right",fontWeight:700,color:stats.profit>=0?"var(--green)":"var(--red)",padding:"12px"}}>{fmt(stats.profit)} RON</td></tr>
+              <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"12px"}}>Impozit pe profit (16%)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--purple)",padding:"12px"}}>{fmt(stats.impozit)} RON</td></tr>
+              <tr style={{borderTop:"3px solid var(--purple)",background:"var(--blue-bg)"}}><td style={{fontWeight:800,fontSize:16,padding:"16px"}}>Profit net</td><td style={{textAlign:"right",fontWeight:800,fontSize:20,color:stats.profitNet>=0?"var(--green)":"var(--red)",padding:"16px"}}>{fmt(stats.profitNet)} RON</td></tr>
+            </tbody></table>
+
+            {/* Detalii plati */}
+            {cur.plati.length>0&&<div style={{marginTop:24}}>
+              <h4 style={{fontSize:14,fontWeight:700,marginBottom:10}}>📤 Plati furnizori ({cur.plati.length})</h4>
+              <table><thead><tr><th>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Categorie</th></tr></thead>
+              <tbody>{cur.plati.map((p,i)=><tr key={p.id}><td>{i+1}</td><td>{p.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(p.amount)}</td><td style={{textAlign:"right"}}>{fmt(getBase(p.amount))}</td><td style={{textAlign:"right"}}>{fmt(getTva(p.amount))}</td><td>{p.category}</td></tr>)}</tbody>
+              <tfoot><tr style={{fontWeight:700,borderTop:"2px solid var(--border)"}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(stats.tP)}</td><td style={{textAlign:"right"}}>{fmt(stats.bP)}</td><td style={{textAlign:"right"}}>{fmt(stats.tvaP)}</td><td></td></tr></tfoot></table>
+            </div>}
+
+            {/* Detalii incasari */}
+            {cur.incasari.length>0&&<div style={{marginTop:24}}>
+              <h4 style={{fontSize:14,fontWeight:700,marginBottom:10}}>📥 Incasari clienti ({cur.incasari.length})</h4>
+              <table><thead><tr><th>#</th><th>Client</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th></tr></thead>
+              <tbody>{cur.incasari.map((inc,i)=><tr key={inc.id}><td>{i+1}</td><td>{inc.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(inc.amount)}</td><td style={{textAlign:"right"}}>{fmt(getBase(inc.amount))}</td><td style={{textAlign:"right"}}>{fmt(getTva(inc.amount))}</td></tr>)}</tbody>
+              <tfoot><tr style={{fontWeight:700,borderTop:"2px solid var(--border)"}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(stats.tI)}</td><td style={{textAlign:"right"}}>{fmt(stats.bI)}</td><td style={{textAlign:"right"}}>{fmt(stats.tvaI)}</td></tr></tfoot></table>
+            </div>}
+
+            {/* Detalii cheltuieli fara TVA */}
+            {chFTVA.length>0&&<div style={{marginTop:24}}>
+              <h4 style={{fontSize:14,fontWeight:700,marginBottom:10}}>💼 Cheltuieli fara TVA ({chFTVA.length})</h4>
+              <table><thead><tr><th>#</th><th>Descriere</th><th style={{textAlign:"right"}}>Suma</th><th>Categorie</th></tr></thead>
+              <tbody>{chFTVA.map((c,i)=><tr key={c.id}><td>{i+1}</td><td>{c.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(c.amount)}</td><td>{c.category}</td></tr>)}</tbody>
+              <tfoot><tr style={{fontWeight:700,borderTop:"2px solid var(--border)"}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(stats.tCH)}</td><td></td></tr></tfoot></table>
+            </div>}
+
+            <div style={{marginTop:24,paddingTop:16,borderTop:"2px solid var(--border)",display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--text2)"}}>
+              <span>Generat: {new Date().toLocaleDateString("ro-RO")} · {firma.nume}</span>
+              <span>Administrator: {firma.administrator}</span>
+            </div>
+          </div></div>
+        </div>}
+
+        {/* CONTACTE */}
+        {tab==="contacte"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <div className="card" style={{borderColor:"var(--blue)",borderWidth:2}}><div className="card-header">🏭 Furnizori ({furnizori.length})</div><div className="card-body">
+            <div style={{display:"flex",gap:8,marginBottom:14}}><input className="input" value={newFurn} onChange={e=>setNewFurn(e.target.value)} placeholder="Furnizor nou" onKeyDown={e=>e.key==="Enter"&&addFurnizor()}/><button className="btn" onClick={addFurnizor} style={{background:"var(--blue)"}}>+</button></div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {furnizori.length===0&&<div style={{color:"var(--text3)",fontSize:13,textAlign:"center",padding:16}}>Furnizorii se adauga automat.</div>}
+              {[...furnizori].sort().map(f=><div key={f} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"var(--bg3)",borderRadius:8}}>
+                {editingContact&&editingContact.type==="furnizor"&&editingContact.name===f?<div style={{display:"flex",gap:6,flex:1}}><input className="input" value={editContactVal} onChange={e=>setEditContactVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")saveEditContact();if(e.key==="Escape")setEditingContact(null);}} autoFocus style={{padding:"6px 10px",fontSize:13}}/><button className="btn" onClick={saveEditContact} style={{background:"var(--green)",padding:"6px 12px",fontSize:12}}>✓</button><button className="btn" onClick={()=>setEditingContact(null)} style={{background:"var(--text3)",padding:"6px 12px",fontSize:12}}>✕</button></div>:<><span style={{fontSize:14,fontWeight:500}}>{f}</span><div><button className="edit-btn" onClick={()=>startEditContact("furnizor",f)}>✏️</button><button className="remove-btn" onClick={()=>removeFurnizor(f)}>×</button></div></>}
+              </div>)}
+            </div>
+          </div></div>
+          <div className="card" style={{borderColor:"var(--green)",borderWidth:2}}><div className="card-header">👤 Clienti ({clienti.length})</div><div className="card-body">
+            <div style={{display:"flex",gap:8,marginBottom:14}}><input className="input" value={newCli} onChange={e=>setNewCli(e.target.value)} placeholder="Client nou" onKeyDown={e=>e.key==="Enter"&&addClient()}/><button className="btn" onClick={addClient} style={{background:"var(--green)"}}>+</button></div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {clienti.length===0&&<div style={{color:"var(--text3)",fontSize:13,textAlign:"center",padding:16}}>Clientii se adauga automat.</div>}
+              {[...clienti].sort().map(c=><div key={c} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"var(--bg3)",borderRadius:8}}>
+                {editingContact&&editingContact.type==="client"&&editingContact.name===c?<div style={{display:"flex",gap:6,flex:1}}><input className="input" value={editContactVal} onChange={e=>setEditContactVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")saveEditContact();if(e.key==="Escape")setEditingContact(null);}} autoFocus style={{padding:"6px 10px",fontSize:13}}/><button className="btn" onClick={saveEditContact} style={{background:"var(--green)",padding:"6px 12px",fontSize:12}}>✓</button><button className="btn" onClick={()=>setEditingContact(null)} style={{background:"var(--text3)",padding:"6px 12px",fontSize:12}}>✕</button></div>:<><span style={{fontSize:14,fontWeight:500}}>{c}</span><div><button className="edit-btn" onClick={()=>startEditContact("client",c)}>✏️</button><button className="remove-btn" onClick={()=>removeClient(c)}>×</button></div></>}
+              </div>)}
+            </div>
+          </div></div>
+        </div>}
+
+        {/* ANUAL - cu raport complet printabil */}
+        {tab==="anual"&&<div>
+          <div className="no-print" style={{display:"flex",gap:10,marginBottom:14}}>
+            <button className="btn" onClick={printReport} style={{background:"var(--blue)"}}>🖨 Printeaza Raport Anual</button>
+            <button className="btn" onClick={exportExcel} style={{background:"#1d6f42"}}>⬇ Excel Anual</button>
+          </div>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Incasari {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(yearStats.tI)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Plati {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(yearStats.tP)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Ch. fTVA {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(yearStats.tCH)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>TVA anual</div><div style={{fontSize:22,fontWeight:700,color:"var(--yellow)"}}>{fmt(yearStats.tvaDePlata)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Impozit Profit</div><div style={{fontSize:22,fontWeight:700,color:"var(--purple)"}}>{fmt(yearStats.impozit)} RON</div></div>
+            <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Profit net {year}</div><div style={{fontSize:22,fontWeight:700,color:(yearStats.profit-yearStats.impozit)>=0?"var(--green)":"var(--red)"}}>{fmt(yearStats.profit-yearStats.impozit)} RON</div></div>
+          </div>
+
+          {/* Raport anual complet printabil */}
+          <div className="card"><div className="card-header">📊 Raport Anual Complet — {year}</div><div className="card-body">
+            <h3 style={{fontSize:16,fontWeight:700,marginBottom:16,textAlign:"center"}}>{firma.nume} — Raport Financiar Anual {year}</h3>
+            <table style={{fontSize:14,marginBottom:20}}><tbody>
+              <tr><td style={{fontWeight:600,padding:"10px"}}>Total Incasari (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--green)",padding:"10px"}}>{fmt(yearStats.tI)} RON</td></tr>
+              <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"10px"}}>Total Plati facturi (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--red)",padding:"10px"}}>{fmt(yearStats.tP)} RON</td></tr>
+              <tr><td style={{fontWeight:600,padding:"10px"}}>Total Cheltuieli fara TVA</td><td style={{textAlign:"right",fontWeight:700,color:"var(--orange)",padding:"10px"}}>{fmt(yearStats.tCH)} RON</td></tr>
+              <tr style={{borderTop:"2px solid var(--border)",background:"var(--yellow-bg)"}}><td style={{fontWeight:700,padding:"12px"}}>TVA de plata anual</td><td style={{textAlign:"right",fontWeight:700,color:yearStats.tvaDePlata>0?"var(--red)":"var(--green)",padding:"12px"}}>{fmt(yearStats.tvaDePlata)} RON</td></tr>
+              <tr><td style={{fontWeight:600,padding:"10px"}}>Profit brut</td><td style={{textAlign:"right",fontWeight:700,color:yearStats.profit>=0?"var(--green)":"var(--red)",padding:"10px"}}>{fmt(yearStats.profit)} RON</td></tr>
+              <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"10px"}}>Impozit pe profit (16%)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--purple)",padding:"10px"}}>{fmt(yearStats.impozit)} RON</td></tr>
+              <tr style={{borderTop:"3px solid var(--purple)",background:"var(--blue-bg)"}}><td style={{fontWeight:800,fontSize:16,padding:"14px"}}>Profit net anual</td><td style={{textAlign:"right",fontWeight:800,fontSize:20,color:(yearStats.profit-yearStats.impozit)>=0?"var(--green)":"var(--red)",padding:"14px"}}>{fmt(yearStats.profit-yearStats.impozit)} RON</td></tr>
+            </tbody></table>
+
+            {/* Trimestrial summary */}
+            <h4 style={{fontSize:14,fontWeight:700,marginBottom:10}}>📋 Sumar Trimestrial</h4>
+            <table style={{marginBottom:20}}><thead><tr><th>Trimestru</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"right"}}>Impozit</th></tr></thead><tbody>{quarterlyStats.map((q,i)=><tr key={i}><td style={{fontWeight:600}}>{q.name}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(q.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(q.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(q.tCH)}</td><td style={{textAlign:"right",color:q.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(q.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:600,color:q.profit>=0?"var(--green)":"var(--red)"}}>{fmt(q.profit)}</td><td style={{textAlign:"right",color:"var(--purple)"}}>{fmt(q.impozit)}</td></tr>)}</tbody></table>
+          </div></div>
+
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
+            <div className="card" style={{borderColor:"var(--green)",borderWidth:2}}><div className="card-header">🏆 Top 10 Clienti — {year}</div><div className="card-body">{topClienti.length===0?<div style={{textAlign:"center",color:"var(--text3)",padding:16}}>Nu sunt incasari.</div>:<table><thead><tr><th>#</th><th>Client</th><th style={{textAlign:"right"}}>Total</th><th style={{textAlign:"right"}}>%</th></tr></thead><tbody>{topClienti.map(([n,v],i)=><tr key={n}><td style={{fontWeight:700,color:i<3?"var(--yellow)":"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{n}</td><td style={{textAlign:"right",fontWeight:600,color:"var(--green)"}}>{fmt(v)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{yearStats.tI>0?(v/yearStats.tI*100).toFixed(1):0}%</td></tr>)}</tbody></table>}</div></div>
+            <div className="card" style={{borderColor:"var(--red)",borderWidth:2}}><div className="card-header">📊 Top 10 Cheltuieli — {year}</div><div className="card-body">{topFurnizori.length===0?<div style={{textAlign:"center",color:"var(--text3)",padding:16}}>Nu sunt cheltuieli.</div>:<table><thead><tr><th>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Total</th><th style={{textAlign:"right"}}>%</th></tr></thead><tbody>{topFurnizori.map(([n,v],i)=>{const tot=yearStats.tP+yearStats.tCH;return <tr key={n}><td style={{fontWeight:700,color:i<3?"var(--yellow)":"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{n}</td><td style={{textAlign:"right",fontWeight:600,color:"var(--red)"}}>{fmt(v)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{tot>0?(v/tot*100).toFixed(1):0}%</td></tr>;})}</tbody></table>}</div></div>
+          </div>
+          <div className="card"><div className="card-header">📅 Detalii Lunare — {year}</div><div className="card-body" style={{overflowX:"auto"}}><table><thead><tr><th>Luna</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"center"}}>Nr.</th></tr></thead><tbody>{MONTHS.map((m,i)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];const inc=md.incasari.reduce((s,x)=>s+x.amount,0);const pl=md.plati.reduce((s,x)=>s+x.amount,0);const tCH=ch.reduce((s,x)=>s+x.amount,0);const tI=md.incasari.reduce((s,x)=>s+getTva(x.amount),0);const tP=md.plati.reduce((s,x)=>s+getTva(x.amount),0);const pr=(inc-tI)-(pl-tP)-tCH;const has=md.plati.length>0||md.incasari.length>0||ch.length>0;const cnt=md.plati.length+md.incasari.length+ch.length;return <tr key={m} style={{opacity:has?1:0.4,cursor:"pointer"}} onClick={()=>{setMonth(m);setTab("dashboard");}}><td style={{fontWeight:600}}>{m}{m===month&&<span style={{marginLeft:6,fontSize:10,color:"var(--blue)"}}> ◀</span>}</td><td style={{textAlign:"right",color:"var(--green)"}}>{has?fmt(inc):"—"}</td><td style={{textAlign:"right",color:"var(--red)"}}>{has?fmt(pl):"—"}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{has?fmt(tCH):"—"}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{has?fmt(tI-tP):"—"}</td><td style={{textAlign:"right",fontWeight:600,color:pr>=0?"var(--green)":"var(--red)"}}>{has?fmt(pr):"—"}</td><td style={{textAlign:"center"}}>{has?<span style={{background:"var(--blue-bg2)",color:"var(--blue)",padding:"2px 10px",borderRadius:12,fontSize:12,fontWeight:600}}>{cnt}</span>:"—"}</td></tr>;})}</tbody>
+            <tfoot><tr style={{fontWeight:700,borderTop:"3px solid var(--border)",background:"var(--blue-bg)"}}><td>TOTAL {year}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(yearStats.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(yearStats.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(yearStats.tCH)}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{fmt(yearStats.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:800,color:yearStats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(yearStats.profit)}</td><td></td></tr></tfoot>
+          </table></div></div>
+        </div>}
+      </div>
+
+      {/* SEARCH MODAL */}
+      {showSearch&&<div className="modal-overlay" onClick={()=>setShowSearch(false)}><div className="modal search-modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <h2 style={{fontSize:18,fontWeight:700}}>🔍 Cautare Globala</h2>
+          <button onClick={()=>setShowSearch(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text)"}}>✕</button>
+        </div>
+        <input className="input" autoFocus value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);doSearch(e.target.value);}} placeholder="Cauta furnizor, client, suma, categorie..." style={{marginBottom:14,fontSize:15,padding:"12px 16px"}}/>
+        {searchQuery.length>=2&&<div style={{fontSize:12,color:"var(--text2)",marginBottom:8}}>{searchResults.length} rezultate gasite {searchResults.length===100?"(limitat la 100)":""}</div>}
+        <div style={{maxHeight:400,overflowY:"auto"}}>
+          {searchResults.length===0&&searchQuery.length>=2&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>Niciun rezultat gasit.</div>}
+          {searchResults.map((r,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",borderBottom:"1px solid var(--border2)",cursor:"pointer",borderRadius:6}} onClick={()=>{setYear(r.year);setMonth(r.month);setTab(r.type==="Plata"?"plati":r.type==="Incasare"?"incasari":r.type==="Cheltuiala fTVA"?"cheltuieli":"registru");setShowSearch(false);}}>
+            <div>
+              <div style={{fontWeight:600,fontSize:14}}>{r.name}</div>
+              <div style={{fontSize:11,color:"var(--text2)"}}>
+                <span className={r.type==="Incasare"?"badge badge-op":"badge"} style={{fontSize:10,marginRight:6}}>{r.type}</span>
+                {r.category&&<span style={{marginRight:6}}>{r.category}</span>}
+                {r.month} {r.year} · {fmtDate(r.data)}
+              </div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontWeight:700,color:r.type==="Incasare"?"var(--green)":"var(--red)"}}>{fmt(r.amount)} RON</div>
+              <div style={{fontSize:11}}><TipPlataBadge tip={r.tipPlata||"OP"}/></div>
+            </div>
+          </div>)}
+        </div>
+      </div></div>}
+
+      {/* SETTINGS MODAL */}
+      {showSettings&&<div className="modal-overlay" onClick={()=>setShowSettings(false)}><div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}><h2 style={{fontSize:18,fontWeight:700}}>⚙ Setari</h2><button onClick={()=>setShowSettings(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text)"}}>✕</button></div>
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Date Firma</label><button className="btn" onClick={()=>{setEditFirma({...firma});setShowFirmaModal(true);setShowSettings(false);}} style={{background:"var(--blue)",width:"100%"}}>🏢 Editeaza datele firmei</button></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4,color:"var(--text2)"}}>Google Sheets URL</label><div style={{display:"flex",gap:8}}><input className="input" value={scriptUrl} readOnly style={{fontSize:11}}/><button className="btn" onClick={()=>navigator.clipboard.writeText(scriptUrl)} style={{background:"var(--blue)",padding:"8px 14px",fontSize:12}}>📋</button></div></div>
+          <div><button className="btn" onClick={()=>{setShowSettings(false);disconnect();}} style={{background:"var(--red)",width:"100%"}}>🔄 Deconecteaza si schimba contul</button></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Backup & Restaurare</label><div style={{display:"flex",gap:8}}><button className="btn" onClick={backupJSON} style={{background:"var(--green)",flex:1}}>⬇ Backup</button><label className="btn" style={{background:"var(--orange)",flex:1,textAlign:"center",cursor:"pointer"}}>⬆ Restaureaza<input type="file" accept=".json" onChange={restoreJSON} style={{display:"none"}}/></label></div></div>
+          <div style={{borderTop:"1px solid var(--border)",paddingTop:12}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Categorii</label><div style={{display:"flex",gap:8}}><button className="btn" onClick={()=>{setCatModalType("tva");setShowCatModal(true);setShowSettings(false);}} style={{background:"var(--blue)",flex:1,fontSize:12,padding:"8px"}}>📂 Cu TVA ({CATS.length})</button><button className="btn" onClick={()=>{setCatModalType("notva");setShowCatModal(true);setShowSettings(false);}} style={{background:"var(--orange)",flex:1,fontSize:12,padding:"8px"}}>💼 Fara TVA ({CATS_NOTVA.length})</button></div></div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid var(--border)",paddingTop:12}}><span style={{fontWeight:600}}>Dark Mode</span><button className="btn" onClick={()=>setDarkMode(!darkMode)} style={{background:darkMode?"var(--green)":"var(--border3)",padding:"8px 24px"}}>{darkMode?"☀️ Light":"🌙 Dark"}</button></div>
+          <div style={{fontSize:11,color:"var(--text3)",borderTop:"1px solid var(--border)",paddingTop:12,textAlign:"center"}}>Gestiune Financiara v5.0 · {firma.nume}</div>
+        </div>
+      </div></div>}
+
+      {/* FIRMA MODAL */}
+      {showFirmaModal&&<div className="modal-overlay" onClick={()=>setShowFirmaModal(false)}><div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><h2 style={{fontSize:16,fontWeight:700}}>🏢 Date Firma</h2><button onClick={()=>setShowFirmaModal(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text)"}}>✕</button></div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {[["nume","Denumire firma"],["cui","CUI"],["regCom","Nr. Reg. Comert"],["sediu","Adresa sediu"],["localitate","Judet / Localitate"],["cont","Cont bancar (IBAN)"],["banca","Banca"],["administrator","Administrator"]].map(([key,label])=>
+            <div key={key}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{label}</label><input className="input" value={editFirma[key]||""} onChange={e=>setEditFirma({...editFirma,[key]:e.target.value})}/></div>
+          )}
+          <button className="btn" onClick={saveFirma} style={{background:"var(--green)",marginTop:8,width:"100%"}}>💾 Salveaza datele firmei</button>
+        </div>
+      </div></div>}
+
+      {/* EDIT ITEM MODAL */}
+      {editModal&&<div className="modal-overlay" onClick={()=>setEditModal(null)}><div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><h2 style={{fontSize:16,fontWeight:700}}>✏️ Editeaza {editModal.type==="plati"?"Plata":editModal.type==="cheltuieliFaraTVA"?"Cheltuiala":"Incasarea"}</h2><button onClick={()=>setEditModal(null)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text)"}}>✕</button></div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{editModal.type==="plati"?"Furnizor":editModal.type==="cheltuieliFaraTVA"?"Descriere":"Client"}</label><input className="input" value={editModal.name} onChange={e=>setEditModal({...editModal,name:e.target.value})}/></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{editModal.type==="cheltuieliFaraTVA"?"Suma (RON)":"Suma cu TVA"}</label><input className="input" type="number" value={editModal.amount} onChange={e=>setEditModal({...editModal,amount:e.target.value})} step="0.01"/></div>
+          {editModal.type==="plati"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>}
+          {editModal.type==="cheltuieliFaraTVA"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS_NOTVA.map(c=><option key={c}>{c}</option>)}</select></div>}
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip plata</label><select className="input" value={editModal.tipPlata} onChange={e=>setEditModal({...editModal,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Data</label><input className="input" type="date" value={editModal.data} onChange={e=>setEditModal({...editModal,data:e.target.value})}/></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Nr. document (optional)</label><input className="input" value={editModal.nrDocument} onChange={e=>setEditModal({...editModal,nrDocument:e.target.value})} placeholder="Nr. document"/></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip document (optional)</label><select className="input" value={editModal.tipDoc} onChange={e=>setEditModal({...editModal,tipDoc:e.target.value})}><option value="">—</option>{TIP_DOC_OPTIONS.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+          <button className="btn" onClick={saveEditItem} style={{background:"var(--green)",marginTop:8,width:"100%"}}>💾 Salveaza modificarile</button>
+        </div>
+      </div></div>}
+
+      {/* CATEGORY MODAL */}
+      {showCatModal&&<div className="modal-overlay" onClick={()=>setShowCatModal(false)}><div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}><h2 style={{fontSize:16,fontWeight:700}}>{catModalType==="tva"?"📂 Categorii cu TVA":"💼 Categorii fara TVA"}</h2><button onClick={()=>setShowCatModal(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--text)"}}>✕</button></div>
+        <div style={{display:"flex",gap:8,marginBottom:14}}><input className="input" value={newCatName} onChange={e=>setNewCatName(e.target.value)} placeholder="Categorie noua..." onKeyDown={e=>e.key==="Enter"&&addCategory(catModalType)}/><button className="btn" onClick={()=>addCategory(catModalType)} style={{background:catModalType==="tva"?"var(--blue)":"var(--orange)"}}>+ Adauga</button></div>
+        <div style={{display:"flex",flexDirection:"column",gap:6,maxHeight:350,overflowY:"auto"}}>{(catModalType==="tva"?CATS:CATS_NOTVA).map((cat,i)=><div key={cat} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:"var(--bg3)",borderRadius:8}}><span style={{fontSize:13,fontWeight:500}}>{i+1}. {cat}</span><button className="remove-btn" onClick={()=>removeCategory(catModalType,cat)}>×</button></div>)}</div>
+      </div></div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW reg failed:',e));}
+</script>
+</body>
+</html>
