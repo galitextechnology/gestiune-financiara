@@ -369,15 +369,7 @@ function App() {
       let mx=0;
       YEARS.forEach(y=>MONTHS.forEach(mo=>{const md=m[y]?.[mo];if(!md)return;md.plati?.forEach(p=>{if(p.id>mx)mx=p.id;});md.incasari?.forEach(i=>{if(i.id>mx)mx=i.id;});md.cheltuieliFaraTVA?.forEach(c=>{if(c.id>mx)mx=c.id;});(md.operatiuniCasa||[]).forEach(o=>{if(o.id>mx)mx=o.id;});}));
       setNextId(mx+1);
-      /* Auto-backup JSON la fiecare sesiune */
-      try {
-        const blob = new Blob([JSON.stringify(m,null,2)],{type:"application/json"});
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `gestiune_autobackup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      } catch(e) { console.warn("Auto-backup failed:", e); }
+      /* Backup manual disponibil din Setari */
     }
     setConnected(true);
   };
