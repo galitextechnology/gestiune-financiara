@@ -242,14 +242,15 @@ function BarChart({dataPoints, width=700, height=300, barColor1="var(--green)", 
   );
 }
 
-const APP_PASSWORD = "11990";
+const DEFAULT_PASSWORD = "11990";
+const getSavedPassword = () => { try { return localStorage.getItem("gestiune_pwd") || DEFAULT_PASSWORD; } catch(e) { return DEFAULT_PASSWORD; } };
 
 function LoginScreen({onLogin}) {
   const [pwd, setPwd] = useState("");
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
   const tryLogin = () => {
-    if(pwd === APP_PASSWORD) {
+    if(pwd === getSavedPassword()) {
       try { sessionStorage.setItem("gestiune_auth","1"); } catch(e) {}
       onLogin();
     } else {
@@ -351,6 +352,17 @@ function App() {
   const [filterPlati, setFilterPlati] = useState({category:"",tipPlata:""});
   const [filterIncasari, setFilterIncasari] = useState({tipPlata:""});
   const [filterCheltuieli, setFilterCheltuieli] = useState({category:"",tipPlata:""});
+  /* ===== PASSWORD ===== */
+  const [showPwdChange, setShowPwdChange] = useState(false);
+  const [pwdOld, setPwdOld] = useState("");
+  const [pwdNew, setPwdNew] = useState("");
+  const [pwdConfirm, setPwdConfirm] = useState("");
+  const [pwdMsg, setPwdMsg] = useState("");
+  /* ===== DASHBOARD LAYOUT ===== */
+  const defaultWidgets = ["stats","cifraAfaceri","cashflow","estimare","tva","impozit","catTVA","catNoTVA","neachitat"];
+  const [dashWidgets, setDashWidgets] = useState(()=>{try{const s=localStorage.getItem("gestiune_dash");return s?JSON.parse(s):defaultWidgets;}catch(e){return defaultWidgets;}});
+  const [dashEditMode, setDashEditMode] = useState(false);
+  const [dragWidget, setDragWidget] = useState(null);
   const saveTimer = useRef(null);
 
   useEffect(()=>{document.documentElement.setAttribute("data-theme",darkMode?"dark":"");localStorage.setItem("gestiune_dark",darkMode);},[darkMode]);
@@ -573,6 +585,30 @@ function App() {
   const monthlyData = useMemo(()=>MONTHS.map((m)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];return{label:m.substring(0,3),v1:md.incasari.reduce((s,x)=>s+x.amount,0),v2:md.plati.reduce((s,x)=>s+x.amount,0),v3:ch.reduce((s,x)=>s+x.amount,0)};}),[data,year]);
   const quarterlyStats = useMemo(()=>QUARTERS.map((qM,qi)=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;qM.forEach(mi=>{const m=MONTHS[mi];const md=data[year]?.[m];if(!md)return;md.incasari?.filter(i=>i.tipPlata!=="Neachitat").forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.filter(p=>p.tipPlata!=="Neachitat").forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).filter(c=>c.tipPlata!=="Neachitat").forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{name:Q_NAMES[qi],tI,tP,tCH,tvaI,tvaP,tvaDePlata:tvaI-tvaP,bI,bP,profit,impozit:profit>0?profit*PROFIT_TAX:0};}),[data,year]);
 
+  /* ===== CASH FLOW FORECAST ===== */
+  const cashFlowForecast = useMemo(()=>{
+    const curIdx = monthIndex(month);
+    const actual = MONTHS.map((m,i)=>{
+      const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};
+      const ch=md.cheltuieliFaraTVA||[];
+      const inc=md.incasari.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      const pl=md.plati.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      const tCH=ch.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      return {month:m, incasari:inc, plati:pl+tCH, net:inc-(pl+tCH), hasData:md.incasari.length>0||md.plati.length>0||ch.length>0};
+    });
+    const past = actual.filter((a,i)=>i<=curIdx && a.hasData);
+    const window = past.length>=3?past.slice(-3):past;
+    const avgInc = window.length>0?window.reduce((s,w)=>s+w.incasari,0)/window.length:0;
+    const avgPl = window.length>0?window.reduce((s,w)=>s+w.plati,0)/window.length:0;
+    const forecast = [];
+    let cumSold = actual.filter((a,i)=>i<=curIdx).reduce((s,a)=>s+a.net,0);
+    for(let i=curIdx+1;i<12;i++){
+      cumSold += avgInc-avgPl;
+      forecast.push({month:MONTHS[i], incasari:avgInc, plati:avgPl, net:avgInc-avgPl, sold:cumSold, isForecast:true});
+    }
+    return {actual:actual.filter((a,i)=>i<=curIdx), forecast, avgInc, avgPl, window:window.length};
+  },[data,year,month]);
+
   const alerts = useMemo(()=>{const al=[];const now=new Date();const d=now.getDate();const cm=now.getMonth();if(d>=20&&d<=25)al.push({type:"warn",text:"Termen TVA: Declaratia 300 se depune pana pe 25."});if(d>=20&&(cm===2||cm===5||cm===8||cm===11))al.push({type:"danger",text:"Termen trimestrial! Declaratia 100 (impozit profit) pana pe 25."});if(stats.tvaDePlata>5000)al.push({type:"warn",text:`TVA de plata ridicat: ${fmt(stats.tvaDePlata)} RON.`});if(stats.profitNet<0)al.push({type:"danger",text:`Profit net negativ: ${fmt(stats.profitNet)} RON.`});return al;},[stats,yearStats,data,year]);
   const estimare = useMemo(()=>{const deficit=stats.totalCheltuieliProfit-stats.bI;return{deficit,deficitWithTVA:deficit*(1+TVA),isOnPlus:stats.profit>=0};},[stats]);
 
@@ -727,6 +763,24 @@ function App() {
   const restoreJSON=(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(ev)=>{try{const r=JSON.parse(ev.target.result);if(r&&typeof r==="object"){const m={...emptyData(),...r};if(!m.dateFirma)m.dateFirma={...DEFAULT_FIRMA};setData(m);triggerSave(m);alert("Date restaurate!");}else{alert("Fisier invalid.");}}catch(err){alert("Eroare: "+err.message);}};reader.readAsText(file);e.target.value="";};
   const printReport=()=>window.print();
 
+  const changePassword = () => {
+    if(pwdOld !== getSavedPassword()) { setPwdMsg("❌ Parola veche este gresita"); return; }
+    if(pwdNew.length < 4) { setPwdMsg("❌ Parola noua trebuie sa aiba minim 4 caractere"); return; }
+    if(pwdNew !== pwdConfirm) { setPwdMsg("❌ Parolele noi nu se potrivesc"); return; }
+    try { localStorage.setItem("gestiune_pwd", pwdNew); } catch(e) {}
+    setPwdMsg("✅ Parola a fost schimbata cu succes!");
+    setPwdOld(""); setPwdNew(""); setPwdConfirm("");
+    setTimeout(() => { setPwdMsg(""); setShowPwdChange(false); }, 1500);
+  };
+
+  /* ===== DASHBOARD DRAG & DROP ===== */
+  const saveDashLayout = (widgets) => { setDashWidgets(widgets); try { localStorage.setItem("gestiune_dash", JSON.stringify(widgets)); } catch(e) {} };
+  const toggleWidget = (id) => { const w = dashWidgets.includes(id) ? dashWidgets.filter(x=>x!==id) : [...dashWidgets, id]; saveDashLayout(w); };
+  const onDragStart = (e, id) => { setDragWidget(id); e.dataTransfer.effectAllowed="move"; };
+  const onDragOver = (e, id) => { e.preventDefault(); if(dragWidget===null||dragWidget===id) return; const arr=[...dashWidgets]; const from=arr.indexOf(dragWidget); const to=arr.indexOf(id); if(from<0||to<0) return; arr.splice(from,1); arr.splice(to,0,dragWidget); saveDashLayout(arr); };
+  const onDragEnd = () => { setDragWidget(null); };
+  const WIDGET_LABELS = {stats:"📊 Statistici rapide",cifraAfaceri:"💼 Cifra de Afaceri",cashflow:"💸 Cash Flow",estimare:"⚡ Estimare",tva:"🧾 TVA",impozit:"📊 Impozit pe Profit",catTVA:"📂 Categorii TVA",catNoTVA:"💼 Categorii fara TVA",neachitat:"⏳ Neachitat",forecast:"📈 Cash Flow Forecast",pnl:"📋 Profit & Loss"};
+
   if(!authenticated) return <LoginScreen onLogin={()=>setAuthenticated(true)}/>;
   if(!connected) return <SetupWizard onConnect={handleConnect}/>;
 
@@ -770,38 +824,74 @@ function App() {
         {/* DASHBOARD */}
         {tab==="dashboard"&&<div>
           {/* Add notification bar */}
-          <div className="no-print" style={{display:"flex",gap:8,marginBottom:12,alignItems:"center"}}>
-            {!showAddNotif&&<button className="btn" onClick={()=>setShowAddNotif(true)} style={{background:"var(--yellow)",padding:"6px 14px",fontSize:12}}>+ Adauga notificare</button>}
-            {showAddNotif&&<div style={{display:"flex",gap:6,flex:1,alignItems:"center"}}>
-              <select value={newNotifType} onChange={e=>setNewNotifType(e.target.value)} style={{padding:"6px 8px",borderRadius:6,border:"1px solid var(--border3)",fontSize:12,background:"var(--bg2)",color:"var(--text)"}}>
-                <option value="warn">⚠️ Atentie</option>
-                <option value="danger">🚨 Important</option>
-                <option value="info">ℹ️ Info</option>
-              </select>
-              <input className="input" value={newNotifText} onChange={e=>setNewNotifText(e.target.value)} placeholder="Ex: Bani de salarii pana pe 28..." onKeyDown={e=>e.key==="Enter"&&addNotif()} style={{padding:"6px 10px",fontSize:13,flex:1}}/>
-              <button className="btn" onClick={addNotif} style={{background:"var(--green)",padding:"6px 14px",fontSize:12}}>Adauga</button>
-              <button className="btn" onClick={()=>{setShowAddNotif(false);setNewNotifText("");}} style={{background:"var(--text3)",padding:"6px 10px",fontSize:12}}>✕</button>
-            </div>}
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:12,alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{display:"flex",gap:8,alignItems:"center",flex:1}}>
+              {!showAddNotif&&<button className="btn" onClick={()=>setShowAddNotif(true)} style={{background:"var(--yellow)",padding:"6px 14px",fontSize:12}}>+ Adauga notificare</button>}
+              {showAddNotif&&<div style={{display:"flex",gap:6,flex:1,alignItems:"center"}}>
+                <select value={newNotifType} onChange={e=>setNewNotifType(e.target.value)} style={{padding:"6px 8px",borderRadius:6,border:"1px solid var(--border3)",fontSize:12,background:"var(--bg2)",color:"var(--text)"}}>
+                  <option value="warn">⚠️ Atentie</option>
+                  <option value="danger">🚨 Important</option>
+                  <option value="info">ℹ️ Info</option>
+                </select>
+                <input className="input" value={newNotifText} onChange={e=>setNewNotifText(e.target.value)} placeholder="Ex: Bani de salarii pana pe 28..." onKeyDown={e=>e.key==="Enter"&&addNotif()} style={{padding:"6px 10px",fontSize:13,flex:1}}/>
+                <button className="btn" onClick={addNotif} style={{background:"var(--green)",padding:"6px 14px",fontSize:12}}>Adauga</button>
+                <button className="btn" onClick={()=>{setShowAddNotif(false);setNewNotifText("");}} style={{background:"var(--text3)",padding:"6px 10px",fontSize:12}}>✕</button>
+              </div>}
+            </div>
+            <button className="btn no-print" onClick={()=>setDashEditMode(!dashEditMode)} style={{background:dashEditMode?"var(--green)":"var(--border3)",color:dashEditMode?"#fff":"var(--text)",padding:"6px 14px",fontSize:12}}>{dashEditMode?"✓ Gata":"⚙ Editeaza layout"}</button>
           </div>
-          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:14}}>
-            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Incasari (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tI)} RON</div></div>
-            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Plati facturi (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tP)} RON</div></div>
-            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cheltuieli fara TVA</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(stats.tCH)} RON</div></div>
-            <div className="stat" style={{borderLeft:"3px solid var(--blue)"}}><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cifra de Afaceri</div><div style={{fontSize:22,fontWeight:700,color:"var(--blue)"}}>{fmt(stats.bI)} RON</div><div style={{fontSize:10,color:"var(--text3)"}}>(Incasari fara TVA)</div></div>
-            <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cash Flow</div><div style={{fontSize:22,fontWeight:700,color:(stats.tI-stats.tP-stats.tCH)>=0?"var(--green)":"var(--red)"}}>{fmt(stats.tI-stats.tP-stats.tCH)} RON</div></div>
-          </div>
-          <div className="card" style={{borderColor:estimare.isOnPlus?"var(--green)":"var(--red)",borderWidth:2,marginBottom:18}}>
-            <div className="card-header">{estimare.isOnPlus?"✅ Firma este pe PLUS":"⚠️ Estimare — cat mai trebuie incasat"}</div>
-            <div className="card-body">{estimare.isOnPlus?<div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:32}}>🎉</div><div><div style={{fontWeight:600,color:"var(--green)",fontSize:16}}>Profit net: {fmt(stats.profitNet)} RON</div><div style={{fontSize:13,color:"var(--text2)"}}>Firma e pe plus luna aceasta.</div></div></div>:<div><div style={{display:"flex",gap:20,flexWrap:"wrap"}}><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Deficit (fara TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--red)"}}>{fmt(Math.abs(estimare.deficit))} RON</div></div><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Min de incasat (cu TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--orange)"}}>{fmt(Math.abs(estimare.deficitWithTVA))} RON</div></div></div></div>}</div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
-            <div className="card" style={{borderColor:"var(--yellow)",borderWidth:2}}><div className="card-header">🧾 TVA</div><div className="card-body"><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Incasat</div><div style={{fontSize:20,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tvaI)}</div></div><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Platit</div><div style={{fontSize:20,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tvaP)}</div></div></div><div style={{borderTop:"1px solid var(--border)",marginTop:12,paddingTop:12,display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600}}>TVA de plata:</span><span style={{fontSize:22,fontWeight:800,color:stats.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(stats.tvaDePlata)} RON</span></div></div></div>
-            <div className="card" style={{borderColor:"var(--purple)",borderWidth:2}}><div className="card-header">📊 Impozit pe Profit</div><div className="card-body"><div style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Venituri (fara TVA):</span><span style={{fontWeight:600,color:"var(--green)"}}>{fmt(stats.bI)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli facturi (fara TVA):</span><span style={{fontWeight:600,color:"var(--red)"}}>-{fmt(stats.bP)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli fara TVA:</span><span style={{fontWeight:600,color:"var(--orange)"}}>-{fmt(stats.tCH)}</span></div></div><div style={{borderTop:"1px solid var(--border)",paddingTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Profit brut:</span><span style={{fontWeight:700,color:stats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Impozit (16%):</span><span style={{fontWeight:700,color:"var(--red)"}}>{fmt(stats.impozit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",borderTop:"2px solid var(--purple)",paddingTop:8}}><span style={{fontWeight:700}}>Profit net:</span><span style={{fontSize:20,fontWeight:800,color:stats.profitNet>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profitNet)} RON</span></div></div></div></div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-            {Object.keys(stats.catMap).length>0&&<div className="card"><div className="card-header">📂 Cheltuieli cu TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCat)*100+"%"}}/></div></div>)}</div></div>}
-            {Object.keys(stats.catMapNoTVA).length>0&&<div className="card"><div className="card-header">💼 Cheltuieli fara TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMapNoTVA).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCatNT)*100+"%",background:"linear-gradient(90deg,var(--yellow),var(--orange))"}}/></div></div>)}</div></div>}
-          </div>
+
+          {/* Edit mode panel */}
+          {dashEditMode&&<div className="card no-print" style={{marginBottom:14,borderColor:"var(--blue)",borderWidth:2}}>
+            <div className="card-header" style={{background:"var(--blue-bg)"}}>⚙ Configureaza Dashboard — trage pentru a rearanja, click pentru a ascunde/afisa</div>
+            <div className="card-body" style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {Object.entries(WIDGET_LABELS).map(([id,label])=><button key={id} onClick={()=>toggleWidget(id)} style={{padding:"6px 12px",borderRadius:8,fontSize:12,fontWeight:600,cursor:"pointer",border:"2px solid",borderColor:dashWidgets.includes(id)?"var(--green)":"var(--border3)",background:dashWidgets.includes(id)?"var(--green-bg)":"var(--bg3)",color:dashWidgets.includes(id)?"var(--green)":"var(--text3)"}}>{dashWidgets.includes(id)?"✓":"○"} {label}</button>)}
+              <button onClick={()=>saveDashLayout([...defaultWidgets])} style={{padding:"6px 12px",borderRadius:8,fontSize:12,fontWeight:600,cursor:"pointer",border:"1px solid var(--border3)",background:"var(--bg3)",color:"var(--text2)"}}>↺ Reset default</button>
+            </div>
+          </div>}
+
+          {/* Draggable widgets */}
+          {dashWidgets.map(wid=>{
+            const dragProps = dashEditMode ? {draggable:true, onDragStart:e=>onDragStart(e,wid), onDragOver:e=>onDragOver(e,wid), onDragEnd:onDragEnd, style:{cursor:"grab",outline:dragWidget===wid?"2px dashed var(--blue)":"none",borderRadius:12,marginBottom:14}} : {style:{marginBottom:14}};
+            if(wid==="stats") return <div key={wid} {...dragProps}><div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Incasari (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tI)} RON</div></div>
+              <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Plati facturi (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tP)} RON</div></div>
+              <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cheltuieli fara TVA</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(stats.tCH)} RON</div></div>
+            </div></div>;
+            if(wid==="cifraAfaceri") return <div key={wid} {...dragProps}><div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              <div className="stat" style={{borderLeft:"3px solid var(--blue)"}}><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cifra de Afaceri</div><div style={{fontSize:22,fontWeight:700,color:"var(--blue)"}}>{fmt(stats.bI)} RON</div><div style={{fontSize:10,color:"var(--text3)"}}>(Incasari fara TVA)</div></div>
+              <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Marja profit</div><div style={{fontSize:22,fontWeight:700,color:"var(--purple)"}}>{stats.bI>0?(stats.profitNet/stats.bI*100).toFixed(1):"0.0"}%</div></div>
+            </div></div>;
+            if(wid==="cashflow") return <div key={wid} {...dragProps}><div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cash Flow</div><div style={{fontSize:22,fontWeight:700,color:(stats.tI-stats.tP-stats.tCH)>=0?"var(--green)":"var(--red)"}}>{fmt(stats.tI-stats.tP-stats.tCH)} RON</div></div>
+            </div></div>;
+            if(wid==="estimare") return <div key={wid} {...dragProps}>
+              <div className="card" style={{borderColor:estimare.isOnPlus?"var(--green)":"var(--red)",borderWidth:2,marginBottom:0}}>
+                <div className="card-header">{estimare.isOnPlus?"✅ Firma este pe PLUS":"⚠️ Estimare — cat mai trebuie incasat"}</div>
+                <div className="card-body">{estimare.isOnPlus?<div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:32}}>🎉</div><div><div style={{fontWeight:600,color:"var(--green)",fontSize:16}}>Profit net: {fmt(stats.profitNet)} RON</div><div style={{fontSize:13,color:"var(--text2)"}}>Firma e pe plus luna aceasta.</div></div></div>:<div><div style={{display:"flex",gap:20,flexWrap:"wrap"}}><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Deficit (fara TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--red)"}}>{fmt(Math.abs(estimare.deficit))} RON</div></div><div style={{flex:1,minWidth:200}}><div style={{fontSize:12,color:"var(--text2)"}}>Min de incasat (cu TVA)</div><div style={{fontSize:24,fontWeight:800,color:"var(--orange)"}}>{fmt(Math.abs(estimare.deficitWithTVA))} RON</div></div></div></div>}</div>
+              </div></div>;
+            if(wid==="tva") return <div key={wid} {...dragProps}>
+              <div className="card" style={{borderColor:"var(--yellow)",borderWidth:2,marginBottom:0}}><div className="card-header">🧾 TVA</div><div className="card-body"><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Incasat</div><div style={{fontSize:20,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tvaI)}</div></div><div><div style={{fontSize:12,color:"var(--text2)"}}>TVA Platit</div><div style={{fontSize:20,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tvaP)}</div></div></div><div style={{borderTop:"1px solid var(--border)",marginTop:12,paddingTop:12,display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600}}>TVA de plata:</span><span style={{fontSize:22,fontWeight:800,color:stats.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(stats.tvaDePlata)} RON</span></div></div></div></div>;
+            if(wid==="impozit") return <div key={wid} {...dragProps}>
+              <div className="card" style={{borderColor:"var(--purple)",borderWidth:2,marginBottom:0}}><div className="card-header">📊 Impozit pe Profit</div><div className="card-body"><div style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Venituri (fara TVA):</span><span style={{fontWeight:600,color:"var(--green)"}}>{fmt(stats.bI)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli facturi (fara TVA):</span><span style={{fontWeight:600,color:"var(--red)"}}>-{fmt(stats.bP)}</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:4,fontSize:13}}><span style={{color:"var(--text2)"}}>Cheltuieli fara TVA:</span><span style={{fontWeight:600,color:"var(--orange)"}}>-{fmt(stats.tCH)}</span></div></div><div style={{borderTop:"1px solid var(--border)",paddingTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Profit brut:</span><span style={{fontWeight:700,color:stats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span>Impozit (16%):</span><span style={{fontWeight:700,color:"var(--red)"}}>{fmt(stats.impozit)} RON</span></div><div style={{display:"flex",justifyContent:"space-between",borderTop:"2px solid var(--purple)",paddingTop:8}}><span style={{fontWeight:700}}>Profit net:</span><span style={{fontSize:20,fontWeight:800,color:stats.profitNet>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profitNet)} RON</span></div></div></div></div></div>;
+            if(wid==="catTVA"&&Object.keys(stats.catMap).length>0) return <div key={wid} {...dragProps}>
+              <div className="card" style={{marginBottom:0}}><div className="card-header">📂 Cheltuieli cu TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCat)*100+"%"}}/></div></div>)}</div></div></div>;
+            if(wid==="catNoTVA"&&Object.keys(stats.catMapNoTVA).length>0) return <div key={wid} {...dragProps}>
+              <div className="card" style={{marginBottom:0}}><div className="card-header">💼 Cheltuieli fara TVA pe Categorii</div><div className="card-body" style={{display:"flex",flexDirection:"column",gap:8}}>{Object.entries(stats.catMapNoTVA).sort((a,b)=>b[1]-a[1]).map(([cat,val])=><div key={cat}><div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:3}}><span style={{fontWeight:500}}>{cat}</span><span style={{color:"var(--text2)"}}>{fmt(val)} RON</span></div><div className="bar-bg"><div className="bar-fill" style={{width:(val/maxCatNT)*100+"%",background:"linear-gradient(90deg,var(--yellow),var(--orange))"}}/></div></div>)}</div></div></div>;
+            if(wid==="neachitat"&&(stats.neachitatPlati>0||stats.neachitatIncasari>0)) return <div key={wid} {...dragProps}>
+              <div className="alert-card alert-info" style={{marginBottom:0}}><div><span style={{marginRight:8}}>📋</span>Facturi neachitate: {stats.neachitatPlati>0?`Plati: ${fmt(stats.neachitatPlati)} RON`:""}{stats.neachitatPlati>0&&stats.neachitatIncasari>0?" · ":""}{stats.neachitatIncasari>0?`Incasari: ${fmt(stats.neachitatIncasari)} RON`:""}</div></div></div>;
+            if(wid==="forecast") return <div key={wid} {...dragProps}>
+              <div className="card" style={{borderColor:"var(--blue)",borderWidth:2,marginBottom:0}}><div className="card-header" style={{background:"var(--blue-bg)"}}>📈 Cash Flow Forecast</div><div className="card-body"><div style={{fontSize:12,color:"var(--text2)",marginBottom:6}}>Medie {cashFlowForecast.window} luni: Incasari ~{fmt(cashFlowForecast.avgInc)}, Cheltuieli ~{fmt(cashFlowForecast.avgPl)}</div>
+              {cashFlowForecast.forecast.length>0&&<div style={{padding:8,borderRadius:6,background:cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold>=0?"var(--green-bg)":"var(--red-bg)",fontSize:13,fontWeight:600}}>{cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold>=0?"📈":"📉"} Sold estimat sfarsit an: {fmt(cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold)} RON</div>}
+              </div></div></div>;
+            if(wid==="pnl") return <div key={wid} {...dragProps}>
+              <div className="card" style={{borderColor:"var(--purple)",borderWidth:2,marginBottom:0}}><div className="card-header">📋 P&L Sumar</div><div className="card-body" style={{fontSize:13}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span>Venituri:</span><span style={{fontWeight:700,color:"var(--green)"}}>{fmt(stats.bI)}</span></div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span>Cheltuieli:</span><span style={{fontWeight:700,color:"var(--red)"}}>{fmt(stats.bP+stats.tCH)}</span></div>
+                <div style={{borderTop:"2px solid var(--purple)",paddingTop:6,display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:700}}>Profit net:</span><span style={{fontWeight:800,fontSize:16,color:stats.profitNet>=0?"var(--green)":"var(--red)"}}>{fmt(stats.profitNet)}</span></div>
+              </div></div></div>;
+            return null;
+          })}
         </div>}
 
         {/* PLATI */}
@@ -1003,6 +1093,21 @@ function App() {
             <div className="card"><div className="card-header">💰 Profit Lunar — {year}</div><div className="card-body"><svg viewBox="0 0 700 250" style={{width:"100%",maxWidth:700,height:"auto"}}>{(()=>{const profits=MONTHS.map(m=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];const inc=md.incasari.reduce((s,x)=>s+x.amount,0);const pl=md.plati.reduce((s,x)=>s+x.amount,0);const tCH=ch.reduce((s,x)=>s+x.amount,0);const tI=md.incasari.reduce((s,x)=>s+getTva(x.amount),0);const tP=md.plati.reduce((s,x)=>s+getTva(x.amount),0);return(inc-tI)-(pl-tP)-tCH;});const mx=Math.max(...profits.map(Math.abs),1);const cH=180,sX=60,stp=53,mY=20+cH/2;return <><line x1={sX} y1={mY} x2={680} y2={mY} stroke="var(--border)" strokeWidth="1"/><text x={sX-8} y={mY+4} textAnchor="end" fill="var(--text2)" fontSize="10">0</text>{profits.map((p,i)=>{const x=sX+i*stp+stp/2;const h=Math.abs(p)/mx*(cH/2);const y=p>=0?mY-h:mY;return <g key={i}><rect x={x-8} y={y} width={16} height={h} fill={p>=0?"var(--green)":"var(--red)"} rx="2"/><text x={x} y={240} textAnchor="middle" fill="var(--text2)" fontSize="9">{MONTHS[i].substring(0,3)}</text></g>;})}</>;})()}</svg></div></div>
             <div className="card"><div className="card-header">🧾 TVA Lunar — {year}</div><div className="card-body"><svg viewBox="0 0 700 250" style={{width:"100%",maxWidth:700,height:"auto"}}>{(()=>{const tvas=MONTHS.map(m=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};return md.incasari.reduce((s,x)=>s+getTva(x.amount),0)-md.plati.reduce((s,x)=>s+getTva(x.amount),0);});const mx=Math.max(...tvas.map(Math.abs),1);const cH=180,sX=60,stp=53,mY=20+cH/2;return <><line x1={sX} y1={mY} x2={680} y2={mY} stroke="var(--border)" strokeWidth="1"/><text x={sX-8} y={mY+4} textAnchor="end" fill="var(--text2)" fontSize="10">0</text>{tvas.map((t,i)=>{const x=sX+i*stp+stp/2;const h=Math.abs(t)/mx*(cH/2);const y=t>=0?mY-h:mY;return <g key={i}><rect x={x-8} y={y} width={16} height={h} fill={t>=0?"var(--yellow)":"var(--green)"} rx="2"/><text x={x} y={240} textAnchor="middle" fill="var(--text2)" fontSize="9">{MONTHS[i].substring(0,3)}</text></g>;})}</>;})()}</svg></div></div>
           </div>
+          {/* CASH FLOW FORECAST */}
+          <div className="card" style={{marginTop:14,borderColor:"var(--blue)",borderWidth:2}}>
+            <div className="card-header" style={{background:"var(--blue-bg)"}}>📈 Cash Flow Forecast — {year}</div>
+            <div className="card-body">
+              <div style={{fontSize:12,color:"var(--text2)",marginBottom:12}}>Previziune bazata pe media ultimelor {cashFlowForecast.window} luni cu date. Lunile viitoare sunt estimate.</div>
+              <div style={{overflowX:"auto"}}><table><thead><tr><th>Luna</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Cheltuieli</th><th style={{textAlign:"right"}}>Net</th><th style={{textAlign:"right"}}>Sold cumulat</th><th>Tip</th></tr></thead><tbody>
+                {(()=>{let sold=0;return cashFlowForecast.actual.map((a,i)=>{sold+=a.net;return <tr key={a.month}><td style={{fontWeight:600}}>{a.month}</td><td style={{textAlign:"right",color:"var(--green)"}}>{a.hasData?fmt(a.incasari):"—"}</td><td style={{textAlign:"right",color:"var(--red)"}}>{a.hasData?fmt(a.plati):"—"}</td><td style={{textAlign:"right",fontWeight:600,color:a.net>=0?"var(--green)":"var(--red)"}}>{a.hasData?fmt(a.net):"—"}</td><td style={{textAlign:"right",fontWeight:700,color:sold>=0?"var(--green)":"var(--red)"}}>{a.hasData?fmt(sold):"—"}</td><td><span className="badge" style={{background:"var(--green-bg)",color:"var(--green)"}}>Real</span></td></tr>;});})()}
+                {cashFlowForecast.forecast.map(f=><tr key={f.month} style={{background:"var(--blue-bg)",opacity:0.85}}><td style={{fontWeight:600,fontStyle:"italic"}}>{f.month}</td><td style={{textAlign:"right",color:"var(--green)",fontStyle:"italic"}}>{fmt(f.incasari)}</td><td style={{textAlign:"right",color:"var(--red)",fontStyle:"italic"}}>{fmt(f.plati)}</td><td style={{textAlign:"right",fontWeight:600,color:f.net>=0?"var(--green)":"var(--red)",fontStyle:"italic"}}>{fmt(f.net)}</td><td style={{textAlign:"right",fontWeight:700,color:f.sold>=0?"var(--green)":"var(--red)"}}>{fmt(f.sold)}</td><td><span className="badge badge-neachitat">Forecast</span></td></tr>)}
+              </tbody></table></div>
+              {cashFlowForecast.forecast.length>0&&<div style={{marginTop:14,padding:12,borderRadius:8,background:cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold>=0?"var(--green-bg)":"var(--red-bg)",fontSize:13}}>
+                <strong>{cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold>=0?"📈":"📉"} Prognoza la sfarsitul anului:</strong> Sold estimat <strong>{fmt(cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold)} RON</strong>
+                {cashFlowForecast.forecast[cashFlowForecast.forecast.length-1].sold<0&&<span style={{color:"var(--red)"}}> — Atentie, cash flow negativ!</span>}
+              </div>}
+            </div>
+          </div>
         </div>}
 
         {/* TRIMESTRIAL */}
@@ -1057,6 +1162,60 @@ function App() {
               <span>Administrator: {firma.administrator}</span>
             </div>
           </div></div>
+
+          {/* RAPORT P&L CLASIC */}
+          <div className="card" style={{marginTop:16,borderColor:"var(--purple)",borderWidth:2}}>
+            <div className="card-header" style={{background:"linear-gradient(135deg,#7c3aed11,#7c3aed22)"}}>📋 Profit & Loss (P&L) — {month} {year}</div>
+            <div className="card-body">
+              <h3 style={{fontSize:16,fontWeight:700,marginBottom:4,textAlign:"center"}}>{firma.nume}</h3>
+              <p style={{textAlign:"center",fontSize:12,color:"var(--text2)",marginBottom:16}}>Raport Profit si Pierdere — {month} {year}</p>
+              <table style={{fontSize:14}}>
+                <thead><tr><th style={{textAlign:"left",padding:"10px 12px",fontSize:13}}>Indicator</th><th style={{textAlign:"right",padding:"10px 12px",fontSize:13}}>Suma (RON)</th></tr></thead>
+                <tbody>
+                  <tr style={{background:"var(--green-bg)"}}><td style={{fontWeight:800,padding:"12px",fontSize:15,borderBottom:"2px solid var(--green)"}}>I. VENITURI</td><td style={{textAlign:"right",fontWeight:800,color:"var(--green)",padding:"12px",fontSize:15,borderBottom:"2px solid var(--green)"}}>{fmt(stats.bI)}</td></tr>
+                  <tr><td style={{padding:"8px 12px 8px 28px",color:"var(--text2)"}}>Venituri din vanzari (fara TVA)</td><td style={{textAlign:"right",padding:"8px 12px",color:"var(--green)"}}>{fmt(stats.bI)}</td></tr>
+
+                  <tr style={{background:"var(--red-bg)"}}><td style={{fontWeight:800,padding:"12px",fontSize:15,borderBottom:"2px solid var(--red)"}}>II. CHELTUIELI</td><td style={{textAlign:"right",fontWeight:800,color:"var(--red)",padding:"12px",fontSize:15,borderBottom:"2px solid var(--red)"}}>{fmt(stats.bP + stats.tCH)}</td></tr>
+                  <tr><td style={{padding:"8px 12px 8px 28px",color:"var(--text2)"}}>Cheltuieli cu marfuri/servicii (fara TVA)</td><td style={{textAlign:"right",padding:"8px 12px",color:"var(--red)"}}>{fmt(stats.bP)}</td></tr>
+                  {Object.entries(stats.catMap).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>
+                    <tr key={cat}><td style={{padding:"6px 12px 6px 48px",fontSize:12,color:"var(--text3)"}}>• {cat}</td><td style={{textAlign:"right",padding:"6px 12px",fontSize:12,color:"var(--text3)"}}>{fmt(getBase(val))}</td></tr>
+                  )}
+                  <tr><td style={{padding:"8px 12px 8px 28px",color:"var(--text2)"}}>Cheltuieli operationale (fara TVA)</td><td style={{textAlign:"right",padding:"8px 12px",color:"var(--orange)"}}>{fmt(stats.tCH)}</td></tr>
+                  {Object.entries(stats.catMapNoTVA).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>
+                    <tr key={cat}><td style={{padding:"6px 12px 6px 48px",fontSize:12,color:"var(--text3)"}}>• {cat}</td><td style={{textAlign:"right",padding:"6px 12px",fontSize:12,color:"var(--text3)"}}>{fmt(val)}</td></tr>
+                  )}
+
+                  <tr style={{borderTop:"3px solid var(--border)",background:"var(--yellow-bg)"}}><td style={{fontWeight:800,padding:"14px 12px",fontSize:15}}>III. PROFIT BRUT</td><td style={{textAlign:"right",fontWeight:800,color:stats.profit>=0?"var(--green)":"var(--red)",padding:"14px 12px",fontSize:18}}>{fmt(stats.profit)}</td></tr>
+
+                  <tr><td style={{padding:"10px 12px 10px 28px",fontWeight:600}}>Impozit pe profit (16%)</td><td style={{textAlign:"right",padding:"10px 12px",fontWeight:600,color:"var(--purple)"}}>{fmt(stats.impozit)}</td></tr>
+
+                  <tr style={{borderTop:"3px solid var(--purple)",background:"var(--blue-bg)"}}><td style={{fontWeight:800,padding:"16px 12px",fontSize:16}}>IV. PROFIT NET</td><td style={{textAlign:"right",fontWeight:800,color:stats.profitNet>=0?"var(--green)":"var(--red)",padding:"16px 12px",fontSize:20}}>{fmt(stats.profitNet)}</td></tr>
+
+                  <tr style={{borderTop:"2px solid var(--border)"}}><td style={{padding:"10px 12px",fontWeight:600,color:"var(--text2)"}}>Marja profit net</td><td style={{textAlign:"right",padding:"10px 12px",fontWeight:700,color:"var(--blue)"}}>{stats.bI>0?(stats.profitNet/stats.bI*100).toFixed(1):"0.0"}%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* P&L ANUAL */}
+          <div className="card" style={{marginTop:16,borderColor:"var(--blue)",borderWidth:2}}>
+            <div className="card-header" style={{background:"var(--blue-bg)"}}>📋 Profit & Loss Anual — {year}</div>
+            <div className="card-body">
+              <table style={{fontSize:14}}>
+                <thead><tr><th style={{textAlign:"left",padding:"10px 12px"}}>Indicator</th><th style={{textAlign:"right",padding:"10px 12px"}}>Suma (RON)</th></tr></thead>
+                <tbody>
+                  <tr style={{background:"var(--green-bg)"}}><td style={{fontWeight:800,padding:"12px"}}>I. VENITURI</td><td style={{textAlign:"right",fontWeight:800,color:"var(--green)",padding:"12px"}}>{fmt(yearStats.bI)}</td></tr>
+                  <tr style={{background:"var(--red-bg)"}}><td style={{fontWeight:800,padding:"12px"}}>II. CHELTUIELI TOTALE</td><td style={{textAlign:"right",fontWeight:800,color:"var(--red)",padding:"12px"}}>{fmt(yearStats.bP + yearStats.tCH)}</td></tr>
+                  <tr><td style={{padding:"8px 12px 8px 28px",color:"var(--text2)"}}>Cheltuieli cu marfuri/servicii</td><td style={{textAlign:"right",padding:"8px 12px"}}>{fmt(yearStats.bP)}</td></tr>
+                  <tr><td style={{padding:"8px 12px 8px 28px",color:"var(--text2)"}}>Cheltuieli operationale</td><td style={{textAlign:"right",padding:"8px 12px"}}>{fmt(yearStats.tCH)}</td></tr>
+                  <tr style={{borderTop:"3px solid var(--border)",background:"var(--yellow-bg)"}}><td style={{fontWeight:800,padding:"14px 12px",fontSize:15}}>III. PROFIT BRUT</td><td style={{textAlign:"right",fontWeight:800,color:yearStats.profit>=0?"var(--green)":"var(--red)",padding:"14px 12px",fontSize:18}}>{fmt(yearStats.profit)}</td></tr>
+                  <tr><td style={{padding:"10px 12px 10px 28px",fontWeight:600}}>Impozit pe profit (16%)</td><td style={{textAlign:"right",padding:"10px 12px",fontWeight:600,color:"var(--purple)"}}>{fmt(yearStats.impozit)}</td></tr>
+                  <tr style={{borderTop:"3px solid var(--purple)",background:"var(--blue-bg)"}}><td style={{fontWeight:800,padding:"16px 12px",fontSize:16}}>IV. PROFIT NET</td><td style={{textAlign:"right",fontWeight:800,color:(yearStats.profit-yearStats.impozit)>=0?"var(--green)":"var(--red)",padding:"16px 12px",fontSize:20}}>{fmt(yearStats.profit-yearStats.impozit)}</td></tr>
+                  <tr style={{borderTop:"2px solid var(--border)"}}><td style={{padding:"10px 12px",fontWeight:600,color:"var(--text2)"}}>Marja profit net</td><td style={{textAlign:"right",padding:"10px 12px",fontWeight:700,color:"var(--blue)"}}>{yearStats.bI>0?((yearStats.profit-yearStats.impozit)/yearStats.bI*100).toFixed(1):"0.0"}%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>}
 
         {/* CONTACTE */}
@@ -1162,8 +1321,19 @@ function App() {
           <div><button className="btn" onClick={()=>{setShowSettings(false);disconnect();}} style={{background:"var(--red)",width:"100%"}}>🔄 Deconecteaza si schimba contul</button></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Backup & Restaurare</label><div style={{display:"flex",gap:8}}><button className="btn" onClick={backupJSON} style={{background:"var(--green)",flex:1}}>⬇ Backup</button><label className="btn" style={{background:"var(--orange)",flex:1,textAlign:"center",cursor:"pointer"}}>⬆ Restaureaza<input type="file" accept=".json" onChange={restoreJSON} style={{display:"none"}}/></label></div></div>
           <div style={{borderTop:"1px solid var(--border)",paddingTop:12}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Categorii</label><div style={{display:"flex",gap:8}}><button className="btn" onClick={()=>{setCatModalType("tva");setShowCatModal(true);setShowSettings(false);}} style={{background:"var(--blue)",flex:1,fontSize:12,padding:"8px"}}>📂 Cu TVA ({CATS.length})</button><button className="btn" onClick={()=>{setCatModalType("notva");setShowCatModal(true);setShowSettings(false);}} style={{background:"var(--orange)",flex:1,fontSize:12,padding:"8px"}}>💼 Fara TVA ({CATS_NOTVA.length})</button></div></div>
+          <div style={{borderTop:"1px solid var(--border)",paddingTop:12}}>
+            <label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:6,color:"var(--text2)"}}>Schimba Parola</label>
+            {!showPwdChange?<button className="btn" onClick={()=>setShowPwdChange(true)} style={{background:"var(--purple)",width:"100%"}}>🔒 Schimba parola</button>:
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              <input className="input" type="password" placeholder="Parola veche" value={pwdOld} onChange={e=>setPwdOld(e.target.value)}/>
+              <input className="input" type="password" placeholder="Parola noua (min 4 caractere)" value={pwdNew} onChange={e=>setPwdNew(e.target.value)}/>
+              <input className="input" type="password" placeholder="Confirma parola noua" value={pwdConfirm} onChange={e=>setPwdConfirm(e.target.value)} onKeyDown={e=>e.key==="Enter"&&changePassword()}/>
+              {pwdMsg&&<div style={{fontSize:12,fontWeight:600,color:pwdMsg.startsWith("✅")?"var(--green)":"var(--red)"}}>{pwdMsg}</div>}
+              <div style={{display:"flex",gap:8}}><button className="btn" onClick={changePassword} style={{background:"var(--green)",flex:1}}>💾 Salveaza</button><button className="btn" onClick={()=>{setShowPwdChange(false);setPwdMsg("");setPwdOld("");setPwdNew("");setPwdConfirm("");}} style={{background:"var(--border3)",color:"var(--text)",flex:1}}>Anuleaza</button></div>
+            </div>}
+          </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid var(--border)",paddingTop:12}}><span style={{fontWeight:600}}>Dark Mode</span><button className="btn" onClick={()=>setDarkMode(!darkMode)} style={{background:darkMode?"var(--green)":"var(--border3)",padding:"8px 24px"}}>{darkMode?"☀️ Light":"🌙 Dark"}</button></div>
-          <div style={{fontSize:11,color:"var(--text3)",borderTop:"1px solid var(--border)",paddingTop:12,textAlign:"center"}}>Gestiune Financiara v5.0 · {firma.nume}</div>
+          <div style={{fontSize:11,color:"var(--text3)",borderTop:"1px solid var(--border)",paddingTop:12,textAlign:"center"}}>Gestiune Financiara v6.0 · {firma.nume}</div>
         </div>
       </div></div>}
 
