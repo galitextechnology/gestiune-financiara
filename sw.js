@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestiune-v5';
+const CACHE_NAME = 'gestiune-v6';
 const ASSETS = [
   './',
   './index.html',

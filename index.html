@@ -45,17 +45,18 @@ input,select,button{font-family:inherit}
 .btn{padding:10px 20px;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
 .btn:hover{opacity:0.9}
 .btn:disabled{opacity:0.5;cursor:not-allowed}
-.card{background:var(--bg2);border-radius:12px;box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;transition:background 0.3s}
-.card-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg3);font-weight:700;font-size:15px;transition:background 0.3s}
-.card-body{padding:16px 20px}
+.card{background:var(--bg2);border-radius:10px;box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;transition:background 0.3s}
+.card-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3);font-weight:700;font-size:14px;transition:background 0.3s}
+.card-body{padding:12px 16px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{padding:10px 12px;text-align:left;font-weight:600;font-size:13px;background:var(--bg3);border-bottom:2px solid var(--border);transition:background 0.3s}
-td{padding:10px 12px;border-bottom:1px solid var(--border2)}
+th{padding:7px 10px;text-align:left;font-weight:600;font-size:12px;background:var(--bg3);border-bottom:2px solid var(--border);transition:background 0.3s;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
+td{padding:6px 10px;border-bottom:1px solid var(--border2)}
 tr:hover{background:var(--bg-hover)}
-.badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:500;background:var(--bg3);color:var(--text)}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text)}
 .badge-cash{background:#fef3c7;color:#92400e}
 .badge-op{background:#dbeafe;color:#1e40af}
-.stat{background:var(--bg2);border-radius:12px;padding:18px 20px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:170px;transition:background 0.3s}
+.badge-neachitat{background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5}
+.stat{background:var(--bg2);border-radius:10px;padding:14px 16px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:160px;transition:background 0.3s}
 .tab{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all 0.2s}
 .tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .step{display:flex;align-items:center;gap:12px;padding:16px;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;background:var(--bg2)}
@@ -68,7 +69,9 @@ pre{background:var(--pre-bg);color:var(--pre-text);padding:14px;border-radius:8p
 .edit-btn:hover{opacity:0.7}
 .bar-bg{background:var(--border);border-radius:4px;height:7px;overflow:hidden}
 .bar-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#1e40af);border-radius:4px;transition:width 0.3s}
-.alert-card{padding:12px 16px;border-radius:10px;border-left:4px solid;margin-bottom:10px;font-size:13px}
+.alert-card{padding:10px 14px;border-radius:8px;border-left:4px solid;margin-bottom:8px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.alert-card .alert-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:2px 6px;flex-shrink:0}
+.alert-card .alert-close:hover{color:var(--text)}
 .alert-warn{border-color:#f59e0b;background:var(--yellow-bg);color:var(--text)}
 .alert-danger{border-color:#ef4444;background:var(--red-bg);color:var(--text)}
 .alert-info{border-color:#3b82f6;background:var(--blue-bg);color:var(--text)}
@@ -187,7 +190,7 @@ const daysInMonth = (y,m) => new Date(y, monthIndex(m)+1, 0).getDate();
 const todayISO = () => new Date().toISOString().slice(0,10);
 
 const emptyData = () => {
-  const d = {furnizoriSalvati:[],clientiSalvati:[],categoriiTVA:[...DEFAULT_CATS],categoriiNoTVA:[...DEFAULT_CATS_NOTVA],dateFirma:{...DEFAULT_FIRMA},registruCasaSolduri:{}};
+  const d = {furnizoriSalvati:[],clientiSalvati:[],categoriiTVA:[...DEFAULT_CATS],categoriiNoTVA:[...DEFAULT_CATS_NOTVA],dateFirma:{...DEFAULT_FIRMA},registruCasaSolduri:{},notificariCustom:[]};
   YEARS.forEach(y=>{d[y]={};MONTHS.forEach(m=>{d[y][m]={plati:[],incasari:[],cheltuieliFaraTVA:[],operatiuniCasa:[]};});});
   return d;
 };
@@ -335,6 +338,11 @@ function App() {
   const [showOpCasaForm, setShowOpCasaForm] = useState(false);
   const [newOpCasa, setNewOpCasa] = useState({tipOp:"Incasare",numeOp:"Chitanta",suma:"",data:todayISO(),nrDocument:"",explicatie:"",categorie:""});
   const [editModal, setEditModal] = useState(null);
+  /* ===== NOTIFICATIONS ===== */
+  const [showAddNotif, setShowAddNotif] = useState(false);
+  const [newNotifText, setNewNotifText] = useState("");
+  const [newNotifType, setNewNotifType] = useState("warn");
+  const [dismissedAlerts, setDismissedAlerts] = useState([]);
   /* ===== SEARCH ===== */
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -358,6 +366,7 @@ function App() {
       if(!m.categoriiNoTVA||m.categoriiNoTVA.length===0) m.categoriiNoTVA=[...DEFAULT_CATS_NOTVA];
       if(!m.dateFirma) m.dateFirma={...DEFAULT_FIRMA};
       if(!m.registruCasaSolduri) m.registruCasaSolduri={};
+      if(!m.notificariCustom) m.notificariCustom=[];
       YEARS.forEach(y=>MONTHS.forEach(mo=>{
         if(m[y]&&m[y][mo]){
           if(!m[y][mo].cheltuieliFaraTVA) m[y][mo].cheltuieliFaraTVA=[];
@@ -485,6 +494,28 @@ function App() {
     updateData({...d});
   };
 
+  /* ===== CUSTOM NOTIFICATIONS ===== */
+  const customNotifs = data.notificariCustom||[];
+  const addNotif=()=>{
+    if(!newNotifText.trim())return;
+    const d={...data};
+    d.notificariCustom=[...(d.notificariCustom||[]),{id:Date.now(),text:newNotifText.trim(),type:newNotifType}];
+    updateData({...d});setNewNotifText("");setShowAddNotif(false);
+  };
+  const removeNotif=(id)=>{
+    const d={...data};
+    d.notificariCustom=(d.notificariCustom||[]).filter(n=>n.id!==id);
+    updateData({...d});
+  };
+
+  /* ===== MARK AS PAID (Neachitat → OP/Cash) ===== */
+  const markAsPaid=(type,id,newTip)=>{
+    const d={...data};
+    const list = type==="plati"?cur.plati:type==="incasari"?cur.incasari:chFTVA;
+    d[year][month]={...cur,[type]:list.map(x=>x.id===id?{...x,tipPlata:newTip}:x)};
+    updateData({...d});
+  };
+
   /* ===== GLOBAL SEARCH ===== */
   const doSearch = (q) => {
     if(!q || q.length < 2) { setSearchResults([]); return; }
@@ -516,26 +547,31 @@ function App() {
   };
 
   const stats = useMemo(()=>{
-    const tP=cur.plati.reduce((s,p)=>s+p.amount,0);
-    const tI=cur.incasari.reduce((s,i)=>s+i.amount,0);
-    const tCH=chFTVA.reduce((s,c)=>s+c.amount,0);
-    const tvaP=cur.plati.reduce((s,p)=>s+getTva(p.amount),0);
-    const tvaI=cur.incasari.reduce((s,i)=>s+getTva(i.amount),0);
+    const paidPlati=cur.plati.filter(p=>p.tipPlata!=="Neachitat");
+    const paidIncasari=cur.incasari.filter(i=>i.tipPlata!=="Neachitat");
+    const paidCh=chFTVA.filter(c=>c.tipPlata!=="Neachitat");
+    const tP=paidPlati.reduce((s,p)=>s+p.amount,0);
+    const tI=paidIncasari.reduce((s,i)=>s+i.amount,0);
+    const tCH=paidCh.reduce((s,c)=>s+c.amount,0);
+    const tvaP=paidPlati.reduce((s,p)=>s+getTva(p.amount),0);
+    const tvaI=paidIncasari.reduce((s,i)=>s+getTva(i.amount),0);
+    const neachitatPlati=cur.plati.filter(p=>p.tipPlata==="Neachitat").reduce((s,p)=>s+p.amount,0);
+    const neachitatIncasari=cur.incasari.filter(i=>i.tipPlata==="Neachitat").reduce((s,i)=>s+i.amount,0);
     const bI=tI-tvaI, bP=tP-tvaP;
     const totalCheltuieliProfit = bP + tCH;
     const profit=bI-totalCheltuieliProfit;
     const impozit=profit>0?profit*PROFIT_TAX:0;
-    const catMap={};cur.plati.forEach(p=>{const c=p.category||"Altele";catMap[c]=(catMap[c]||0)+Math.abs(p.amount);});
-    const catMapNoTVA={};chFTVA.forEach(c=>{const cat=c.category||"Altele fara TVA";catMapNoTVA[cat]=(catMapNoTVA[cat]||0)+Math.abs(c.amount);});
-    return{tP,tI,tCH,tvaP,tvaI,tvaDePlata:tvaI-tvaP,bI,bP,totalCheltuieliProfit,profit,impozit,profitNet:profit-impozit,catMap,catMapNoTVA};
+    const catMap={};paidPlati.forEach(p=>{const c=p.category||"Altele";catMap[c]=(catMap[c]||0)+Math.abs(p.amount);});
+    const catMapNoTVA={};paidCh.forEach(c=>{const cat=c.category||"Altele fara TVA";catMapNoTVA[cat]=(catMapNoTVA[cat]||0)+Math.abs(c.amount);});
+    return{tP,tI,tCH,tvaP,tvaI,tvaDePlata:tvaI-tvaP,bI,bP,totalCheltuieliProfit,profit,impozit,profitNet:profit-impozit,catMap,catMapNoTVA,neachitatPlati,neachitatIncasari};
   },[cur,chFTVA]);
 
-  const yearStats = useMemo(()=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{tI,tP,tCH,tvaDePlata:tvaI-tvaP,profit,impozit:profit>0?profit*PROFIT_TAX:0};},[data,year]);
+  const yearStats = useMemo(()=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.filter(i=>i.tipPlata!=="Neachitat").forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.filter(p=>p.tipPlata!=="Neachitat").forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).filter(c=>c.tipPlata!=="Neachitat").forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{tI,tP,tCH,tvaDePlata:tvaI-tvaP,profit,impozit:profit>0?profit*PROFIT_TAX:0};},[data,year]);
 
   const topClienti = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{map[i.name]=(map[i.name]||0)+i.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
   const topFurnizori = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.plati?.forEach(p=>{map[p.name]=(map[p.name]||0)+p.amount;});(md.cheltuieliFaraTVA||[]).forEach(c=>{map[c.name]=(map[c.name]||0)+c.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
   const monthlyData = useMemo(()=>MONTHS.map((m)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];return{label:m.substring(0,3),v1:md.incasari.reduce((s,x)=>s+x.amount,0),v2:md.plati.reduce((s,x)=>s+x.amount,0),v3:ch.reduce((s,x)=>s+x.amount,0)};}),[data,year]);
-  const quarterlyStats = useMemo(()=>QUARTERS.map((qM,qi)=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;qM.forEach(mi=>{const m=MONTHS[mi];const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{name:Q_NAMES[qi],tI,tP,tCH,tvaI,tvaP,tvaDePlata:tvaI-tvaP,bI,bP,profit,impozit:profit>0?profit*PROFIT_TAX:0};}),[data,year]);
+  const quarterlyStats = useMemo(()=>QUARTERS.map((qM,qi)=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;qM.forEach(mi=>{const m=MONTHS[mi];const md=data[year]?.[m];if(!md)return;md.incasari?.filter(i=>i.tipPlata!=="Neachitat").forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.filter(p=>p.tipPlata!=="Neachitat").forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).filter(c=>c.tipPlata!=="Neachitat").forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{name:Q_NAMES[qi],tI,tP,tCH,tvaI,tvaP,tvaDePlata:tvaI-tvaP,bI,bP,profit,impozit:profit>0?profit*PROFIT_TAX:0};}),[data,year]);
 
   const alerts = useMemo(()=>{const al=[];const now=new Date();const d=now.getDate();const cm=now.getMonth();if(d>=20&&d<=25)al.push({type:"warn",text:"Termen TVA: Declaratia 300 se depune pana pe 25."});if(d>=20&&(cm===2||cm===5||cm===8||cm===11))al.push({type:"danger",text:"Termen trimestrial! Declaratia 100 (impozit profit) pana pe 25."});if(stats.tvaDePlata>5000)al.push({type:"warn",text:`TVA de plata ridicat: ${fmt(stats.tvaDePlata)} RON.`});if(stats.profitNet<0)al.push({type:"danger",text:`Profit net negativ: ${fmt(stats.profitNet)} RON.`});return al;},[stats,yearStats,data,year]);
   const estimare = useMemo(()=>{const deficit=stats.totalCheltuieliProfit-stats.bI;return{deficit,deficitWithTVA:deficit*(1+TVA),isOnPlus:stats.profit>=0};},[stats]);
@@ -697,7 +733,7 @@ function App() {
   const maxCatNT=Math.max(...Object.values(stats.catMapNoTVA),1);
   const TABS=[["dashboard","📊 Dashboard"],["plati","📤 Plati (TVA)"],["cheltuieli","💼 Ch. fara TVA"],["incasari","📥 Incasari"],["registru","📒 Registru Casa"],["grafice","📈 Grafice"],["trimestrial","📋 Trimestrial"],["rapoarte","🖨 Rapoarte"],["contacte","👥 Contacte"],["anual","📅 Anual"]];
 
-  const TipPlataBadge=({tip})=><span className={tip==="Cash"?"badge badge-cash":"badge badge-op"}>{tip==="Cash"?"💵 Cash":"🏦 OP"}</span>;
+  const TipPlataBadge=({tip})=>tip==="Neachitat"?<span className="badge badge-neachitat">⏳ Neachitat</span>:tip==="Cash"?<span className="badge badge-cash">💵 Cash</span>:<span className="badge badge-op">🏦 OP</span>;
 
   return (
     <div>
@@ -719,7 +755,11 @@ function App() {
 
       <div className="print-only" style={{padding:"10px 20px",borderBottom:"2px solid #000"}}><h1 style={{fontSize:18,fontWeight:800,margin:0}}>📊 {firma.nume} — {month} {year}</h1><p style={{fontSize:11,color:"#666",margin:"4px 0 0"}}>CUI: {firma.cui} · {firma.regCom} · Generat: {new Date().toLocaleDateString("ro-RO")}</p></div>
 
-      {alerts.length>0&&tab==="dashboard"&&<div className="no-print" style={{padding:"14px 28px 0"}}>{alerts.map((a,i)=><div key={i} className={`alert-card alert-${a.type}`}><span style={{marginRight:8}}>{a.type==="warn"?"⚠️":a.type==="danger"?"🚨":"ℹ️"}</span>{a.text}</div>)}</div>}
+      {tab==="dashboard"&&(alerts.length>0||customNotifs.length>0)&&<div className="no-print" style={{padding:"14px 28px 0"}}>
+        {alerts.filter(a=>!dismissedAlerts.includes(a.text)).map((a,i)=><div key={"sys-"+i} className={`alert-card alert-${a.type}`}><div><span style={{marginRight:8}}>{a.type==="warn"?"⚠️":a.type==="danger"?"🚨":"ℹ️"}</span>{a.text}</div><button className="alert-close" onClick={()=>setDismissedAlerts([...dismissedAlerts,a.text])}>✕</button></div>)}
+        {customNotifs.map(n=><div key={n.id} className={`alert-card alert-${n.type}`}><div><span style={{marginRight:8}}>{n.type==="warn"?"⚠️":n.type==="danger"?"🚨":"ℹ️"}</span>{n.text}</div><button className="alert-close" onClick={()=>removeNotif(n.id)}>✕</button></div>)}
+        {(stats.neachitatPlati>0||stats.neachitatIncasari>0)&&<div className="alert-card alert-info"><div><span style={{marginRight:8}}>📋</span>Facturi neachitate: {stats.neachitatPlati>0?`Plati: ${fmt(stats.neachitatPlati)} RON`:""}{stats.neachitatPlati>0&&stats.neachitatIncasari>0?" · ":""}{stats.neachitatIncasari>0?`Incasari: ${fmt(stats.neachitatIncasari)} RON`:""}</div></div>}
+      </div>}
 
       <div className="no-print" style={{padding:"14px 28px 0",display:"flex",gap:6,flexWrap:"wrap"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
 
@@ -727,7 +767,21 @@ function App() {
 
         {/* DASHBOARD */}
         {tab==="dashboard"&&<div>
-          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>
+          {/* Add notification bar */}
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:12,alignItems:"center"}}>
+            {!showAddNotif&&<button className="btn" onClick={()=>setShowAddNotif(true)} style={{background:"var(--yellow)",padding:"6px 14px",fontSize:12}}>+ Adauga notificare</button>}
+            {showAddNotif&&<div style={{display:"flex",gap:6,flex:1,alignItems:"center"}}>
+              <select value={newNotifType} onChange={e=>setNewNotifType(e.target.value)} style={{padding:"6px 8px",borderRadius:6,border:"1px solid var(--border3)",fontSize:12,background:"var(--bg2)",color:"var(--text)"}}>
+                <option value="warn">⚠️ Atentie</option>
+                <option value="danger">🚨 Important</option>
+                <option value="info">ℹ️ Info</option>
+              </select>
+              <input className="input" value={newNotifText} onChange={e=>setNewNotifText(e.target.value)} placeholder="Ex: Bani de salarii pana pe 28..." onKeyDown={e=>e.key==="Enter"&&addNotif()} style={{padding:"6px 10px",fontSize:13,flex:1}}/>
+              <button className="btn" onClick={addNotif} style={{background:"var(--green)",padding:"6px 14px",fontSize:12}}>Adauga</button>
+              <button className="btn" onClick={()=>{setShowAddNotif(false);setNewNotifText("");}} style={{background:"var(--text3)",padding:"6px 10px",fontSize:12}}>✕</button>
+            </div>}
+          </div>
+          <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:14}}>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Incasari (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tI)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Plati facturi (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tP)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cheltuieli fara TVA</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(stats.tCH)} RON</div></div>
@@ -753,7 +807,7 @@ function App() {
             <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Furnizor</label><input className="input" list="fl" value={newP.name} onChange={e=>setNewP({...newP,name:e.target.value})} placeholder="Furnizor" onKeyDown={e=>e.key==="Enter"&&addPlata()}/><datalist id="fl">{furnizori.map(f=><option key={f} value={f}/>)}</datalist></div>
             <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newP.amount} onChange={e=>setNewP({...newP,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addPlata()}/></div>
             <div style={{flex:1,minWidth:120}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><select className="input" value={newP.category} onChange={e=>setNewP({...newP,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>
-            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newP.tipPlata} onChange={e=>setNewP({...newP,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newP.tipPlata} onChange={e=>setNewP({...newP,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newP.data} onChange={e=>setNewP({...newP,data:e.target.value})}/></div>
             <button className="btn" onClick={addPlata} style={{background:"var(--blue)"}}>+ Adauga</button>
           </div>
@@ -761,13 +815,13 @@ function App() {
           <div className="no-print filter-row">
             <label>Filtre:</label>
             <select value={filterPlati.category} onChange={e=>setFilterPlati({...filterPlati,category:e.target.value})}><option value="">Toate categoriile</option>{CATS.map(c=><option key={c} value={c}>{c}</option>)}</select>
-            <select value={filterPlati.tipPlata} onChange={e=>setFilterPlati({...filterPlati,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select>
+            <select value={filterPlati.tipPlata} onChange={e=>setFilterPlati({...filterPlati,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select>
             {(filterPlati.category||filterPlati.tipPlata)&&<button onClick={()=>setFilterPlati({category:"",tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
             {(filterPlati.category||filterPlati.tipPlata)&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredPlati.length} din {cur.plati.length})</span>}
           </div>
           <div style={{overflowX:"auto"}}><table>
-            <thead><tr><th style={{width:30}}>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
-            <tbody>{filteredPlati.map((p,i)=><tr key={p.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{p.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(p.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(p.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(p.amount))}</td><td><span className="badge">{p.category}</span></td><td><TipPlataBadge tip={p.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(p.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("plati",p)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("plati",p.id)}>×</button></td></tr>)}</tbody>
+            <thead><tr><th style={{width:30}}>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:100}}></th></tr></thead>
+            <tbody>{filteredPlati.map((p,i)=><tr key={p.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{p.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(p.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(p.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(p.amount))}</td><td><span className="badge">{p.category}</span></td><td><TipPlataBadge tip={p.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(p.data)}</td><td className="no-print">{p.tipPlata==="Neachitat"&&<button className="edit-btn" title="Marchează achitat" onClick={()=>markAsPaid("plati",p.id,"OP")} style={{color:"var(--green)",fontWeight:700,fontSize:11}}>✅ Achitat</button>}<button className="edit-btn" onClick={()=>startEditItem("plati",p)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("plati",p.id)}>×</button></td></tr>)}</tbody>
             {filteredPlati.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--blue)",background:"var(--blue-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+p.amount,0))}</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+getBase(p.amount),0))}</td><td style={{textAlign:"right"}}>{fmt(filteredPlati.reduce((s,p)=>s+getTva(p.amount),0))}</td><td colSpan={4}></td></tr></tfoot>}
           </table></div>
           {filteredPlati.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{cur.plati.length===0?"Nicio plata inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
@@ -788,13 +842,13 @@ function App() {
           <div className="no-print filter-row">
             <label>Filtre:</label>
             <select value={filterCheltuieli.category} onChange={e=>setFilterCheltuieli({...filterCheltuieli,category:e.target.value})}><option value="">Toate categoriile</option>{CATS_NOTVA.map(c=><option key={c} value={c}>{c}</option>)}</select>
-            <select value={filterCheltuieli.tipPlata} onChange={e=>setFilterCheltuieli({...filterCheltuieli,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="Cash">💵 Cash</option><option value="OP">🏦 OP</option></select>
+            <select value={filterCheltuieli.tipPlata} onChange={e=>setFilterCheltuieli({...filterCheltuieli,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="Cash">💵 Cash</option><option value="OP">🏦 OP</option><option value="Neachitat">⏳ Neachitat</option></select>
             {(filterCheltuieli.category||filterCheltuieli.tipPlata)&&<button onClick={()=>setFilterCheltuieli({category:"",tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
             {(filterCheltuieli.category||filterCheltuieli.tipPlata)&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredCheltuieli.length} din {chFTVA.length})</span>}
           </div>
           <div style={{overflowX:"auto"}}><table>
-            <thead><tr><th style={{width:30}}>#</th><th>Descriere</th><th style={{textAlign:"right"}}>Suma</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
-            <tbody>{filteredCheltuieli.map((c,i)=><tr key={c.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{c.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(c.amount)}</td><td><span className="badge" style={{background:"var(--yellow-bg)"}}>{c.category}</span></td><td><TipPlataBadge tip={c.tipPlata||"Cash"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(c.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("cheltuieliFaraTVA",c)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("cheltuieliFaraTVA",c.id)}>×</button></td></tr>)}</tbody>
+            <thead><tr><th style={{width:30}}>#</th><th>Descriere</th><th style={{textAlign:"right"}}>Suma</th><th>Categorie</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:100}}></th></tr></thead>
+            <tbody>{filteredCheltuieli.map((c,i)=><tr key={c.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{c.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(c.amount)}</td><td><span className="badge" style={{background:"var(--yellow-bg)"}}>{c.category}</span></td><td><TipPlataBadge tip={c.tipPlata||"Cash"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(c.data)}</td><td className="no-print">{c.tipPlata==="Neachitat"&&<button className="edit-btn" title="Marchează achitat" onClick={()=>markAsPaid("cheltuieliFaraTVA",c.id,"Cash")} style={{color:"var(--green)",fontWeight:700,fontSize:11}}>✅ Achitat</button>}<button className="edit-btn" onClick={()=>startEditItem("cheltuieliFaraTVA",c)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("cheltuieliFaraTVA",c.id)}>×</button></td></tr>)}</tbody>
             {filteredCheltuieli.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--orange)",background:"var(--yellow-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredCheltuieli.reduce((s,c)=>s+c.amount,0))}</td><td colSpan={4}></td></tr></tfoot>}
           </table></div>
           {filteredCheltuieli.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{chFTVA.length===0?"Nicio cheltuiala fara TVA inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
@@ -805,20 +859,20 @@ function App() {
           <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
             <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Client</label><input className="input" list="cl" value={newI.name} onChange={e=>setNewI({...newI,name:e.target.value})} placeholder="Client" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/><datalist id="cl">{clienti.map(c=><option key={c} value={c}/>)}</datalist></div>
             <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newI.amount} onChange={e=>setNewI({...newI,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/></div>
-            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newI.tipPlata} onChange={e=>setNewI({...newI,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+            <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newI.tipPlata} onChange={e=>setNewI({...newI,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newI.data} onChange={e=>setNewI({...newI,data:e.target.value})}/></div>
             <button className="btn" onClick={addIncasare} style={{background:"var(--green)"}}>+ Adauga</button>
           </div>
           {/* Filtre */}
           <div className="no-print filter-row">
             <label>Filtre:</label>
-            <select value={filterIncasari.tipPlata} onChange={e=>setFilterIncasari({...filterIncasari,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select>
+            <select value={filterIncasari.tipPlata} onChange={e=>setFilterIncasari({...filterIncasari,tipPlata:e.target.value})}><option value="">Toate tipurile</option><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select>
             {filterIncasari.tipPlata&&<button onClick={()=>setFilterIncasari({tipPlata:""})} style={{background:"none",border:"none",cursor:"pointer",color:"var(--red)",fontSize:12,fontWeight:600}}>✕ Reset</button>}
             {filterIncasari.tipPlata&&<span style={{fontSize:11,color:"var(--text3)"}}>({filteredIncasari.length} din {cur.incasari.length})</span>}
           </div>
           <div style={{overflowX:"auto"}}><table>
-            <thead><tr><th style={{width:30}}>#</th><th>Client</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:70}}></th></tr></thead>
-            <tbody>{filteredIncasari.map((inc,i)=><tr key={inc.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{inc.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(inc.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(inc.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(inc.amount))}</td><td><TipPlataBadge tip={inc.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(inc.data)}</td><td className="no-print"><button className="edit-btn" onClick={()=>startEditItem("incasari",inc)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("incasari",inc.id)}>×</button></td></tr>)}</tbody>
+            <thead><tr><th style={{width:30}}>#</th><th>Client</th><th style={{textAlign:"right"}}>Cu TVA</th><th style={{textAlign:"right"}}>Baza</th><th style={{textAlign:"right"}}>TVA</th><th>Tip</th><th>Data</th><th className="no-print" style={{width:100}}></th></tr></thead>
+            <tbody>{filteredIncasari.map((inc,i)=><tr key={inc.id} style={{background:i%2===0?"var(--bg2)":"var(--bg3)"}}><td style={{color:"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{inc.name}</td><td style={{textAlign:"right",fontWeight:600}}>{fmt(inc.amount)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getBase(inc.amount))}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{fmt(getTva(inc.amount))}</td><td><TipPlataBadge tip={inc.tipPlata||"OP"}/></td><td style={{fontSize:11,color:"var(--text2)"}}>{fmtDate(inc.data)}</td><td className="no-print">{inc.tipPlata==="Neachitat"&&<button className="edit-btn" title="Marchează achitat" onClick={()=>markAsPaid("incasari",inc.id,"OP")} style={{color:"var(--green)",fontWeight:700,fontSize:11}}>✅ Achitat</button>}<button className="edit-btn" onClick={()=>startEditItem("incasari",inc)}>✏️</button><button className="remove-btn" onClick={()=>removeItem("incasari",inc.id)}>×</button></td></tr>)}</tbody>
             {filteredIncasari.length>0&&<tfoot><tr style={{borderTop:"2px solid var(--green)",background:"var(--green-bg)",fontWeight:700}}><td colSpan={2}>TOTAL</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+i.amount,0))}</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+getBase(i.amount),0))}</td><td style={{textAlign:"right"}}>{fmt(filteredIncasari.reduce((s,i)=>s+getTva(i.amount),0))}</td><td colSpan={3}></td></tr></tfoot>}
           </table></div>
           {filteredIncasari.length===0&&<div style={{textAlign:"center",padding:30,color:"var(--text3)"}}>{cur.incasari.length===0?"Nicio incasare inca.":"Niciun rezultat pentru filtrele selectate."}</div>}
@@ -1127,7 +1181,7 @@ function App() {
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{editModal.type==="cheltuieliFaraTVA"?"Suma (RON)":"Suma cu TVA"}</label><input className="input" type="number" value={editModal.amount} onChange={e=>setEditModal({...editModal,amount:e.target.value})} step="0.01"/></div>
           {editModal.type==="plati"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>}
           {editModal.type==="cheltuieliFaraTVA"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS_NOTVA.map(c=><option key={c}>{c}</option>)}</select></div>}
-          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip plata</label><select className="input" value={editModal.tipPlata} onChange={e=>setEditModal({...editModal,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option></select></div>
+          <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip plata</label><select className="input" value={editModal.tipPlata} onChange={e=>setEditModal({...editModal,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Data</label><input className="input" type="date" value={editModal.data} onChange={e=>setEditModal({...editModal,data:e.target.value})}/></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Nr. document (optional)</label><input className="input" value={editModal.nrDocument} onChange={e=>setEditModal({...editModal,nrDocument:e.target.value})} placeholder="Nr. document"/></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip document (optional)</label><select className="input" value={editModal.tipDoc} onChange={e=>setEditModal({...editModal,tipDoc:e.target.value})}><option value="">—</option>{TIP_DOC_OPTIONS.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
