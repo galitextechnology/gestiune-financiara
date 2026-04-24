@@ -566,7 +566,7 @@ function App() {
     return{tP,tI,tCH,tvaP,tvaI,tvaDePlata:tvaI-tvaP,bI,bP,totalCheltuieliProfit,profit,impozit,profitNet:profit-impozit,catMap,catMapNoTVA,neachitatPlati,neachitatIncasari};
   },[cur,chFTVA]);
 
-  const yearStats = useMemo(()=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.filter(i=>i.tipPlata!=="Neachitat").forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.filter(p=>p.tipPlata!=="Neachitat").forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).filter(c=>c.tipPlata!=="Neachitat").forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{tI,tP,tCH,tvaDePlata:tvaI-tvaP,profit,impozit:profit>0?profit*PROFIT_TAX:0};},[data,year]);
+  const yearStats = useMemo(()=>{let tI=0,tP=0,tvaI=0,tvaP=0,tCH=0;MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.filter(i=>i.tipPlata!=="Neachitat").forEach(i=>{tI+=i.amount;tvaI+=getTva(i.amount);});md.plati?.filter(p=>p.tipPlata!=="Neachitat").forEach(p=>{tP+=p.amount;tvaP+=getTva(p.amount);});(md.cheltuieliFaraTVA||[]).filter(c=>c.tipPlata!=="Neachitat").forEach(c=>{tCH+=c.amount;});});const bI=tI-tvaI,bP=tP-tvaP,profit=bI-bP-tCH;return{tI,tP,tCH,tvaI,tvaP,bI,bP,cifraAfaceri:bI,tvaDePlata:tvaI-tvaP,profit,impozit:profit>0?profit*PROFIT_TAX:0};},[data,year]);
 
   const topClienti = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.incasari?.forEach(i=>{map[i.name]=(map[i.name]||0)+i.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
   const topFurnizori = useMemo(()=>{const map={};MONTHS.forEach(m=>{const md=data[year]?.[m];if(!md)return;md.plati?.forEach(p=>{map[p.name]=(map[p.name]||0)+p.amount;});(md.cheltuieliFaraTVA||[]).forEach(c=>{map[c.name]=(map[c.name]||0)+c.amount;});});return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);},[data,year]);
@@ -688,6 +688,7 @@ function App() {
       ["Raport Financiar",month,year],
       [],
       ["Indicator","Valoare (RON)"],
+      ["Cifra de Afaceri (fara TVA)",stats.bI],
       ["Incasari (cu TVA)",stats.tI],
       ["Plati facturi (cu TVA)",stats.tP],
       ["Cheltuieli fara TVA",stats.tCH],
@@ -702,19 +703,20 @@ function App() {
     XLSX.utils.book_append_sheet(wb, ws4, "Sumar");
 
     /* Sheet 5: Anual */
-    const anualData = [["Luna","Incasari","Plati","Ch. fTVA","TVA","Profit"]];
+    const anualData = [["Luna","Cifra Afaceri","Incasari","Plati","Ch. fTVA","TVA","Profit"]];
     MONTHS.forEach(m => {
       const md = data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};
       const ch = md.cheltuieliFaraTVA||[];
-      const inc = md.incasari.reduce((s,x)=>s+x.amount,0);
-      const pl = md.plati.reduce((s,x)=>s+x.amount,0);
-      const tCH = ch.reduce((s,x)=>s+x.amount,0);
-      const tI = md.incasari.reduce((s,x)=>s+getTva(x.amount),0);
-      const tP = md.plati.reduce((s,x)=>s+getTva(x.amount),0);
-      const pr = (inc-tI)-(pl-tP)-tCH;
-      anualData.push([m, inc, pl, tCH, tI-tP, pr]);
+      const inc = md.incasari.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      const pl = md.plati.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      const tCH = ch.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);
+      const tvaInc = md.incasari.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+getTva(x.amount),0);
+      const tvaPl = md.plati.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+getTva(x.amount),0);
+      const ca = inc-tvaInc;
+      const pr = ca-(pl-tvaPl)-tCH;
+      anualData.push([m, ca, inc, pl, tCH, tvaInc-tvaPl, pr]);
     });
-    anualData.push(["TOTAL",yearStats.tI,yearStats.tP,yearStats.tCH,yearStats.tvaDePlata,yearStats.profit]);
+    anualData.push(["TOTAL",yearStats.cifraAfaceri,yearStats.tI,yearStats.tP,yearStats.tCH,yearStats.tvaDePlata,yearStats.profit]);
     const ws5 = XLSX.utils.aoa_to_sheet(anualData);
     XLSX.utils.book_append_sheet(wb, ws5, "Anual "+year);
 
@@ -785,6 +787,7 @@ function App() {
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Incasari (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(stats.tI)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Plati facturi (cu TVA)</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(stats.tP)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cheltuieli fara TVA</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(stats.tCH)} RON</div></div>
+            <div className="stat" style={{borderLeft:"3px solid var(--blue)"}}><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cifra de Afaceri</div><div style={{fontSize:22,fontWeight:700,color:"var(--blue)"}}>{fmt(stats.bI)} RON</div><div style={{fontSize:10,color:"var(--text3)"}}>(Incasari fara TVA)</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)",fontWeight:500}}>Cash Flow</div><div style={{fontSize:22,fontWeight:700,color:(stats.tI-stats.tP-stats.tCH)>=0?"var(--green)":"var(--red)"}}>{fmt(stats.tI-stats.tP-stats.tCH)} RON</div></div>
           </div>
           <div className="card" style={{borderColor:estimare.isOnPlus?"var(--green)":"var(--red)",borderWidth:2,marginBottom:18}}>
@@ -1085,6 +1088,7 @@ function App() {
             <button className="btn" onClick={exportExcel} style={{background:"#1d6f42"}}>⬇ Excel Anual</button>
           </div>
           <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>
+            <div className="stat" style={{borderLeft:"3px solid var(--blue)"}}><div style={{fontSize:12,color:"var(--text2)"}}>Cifra de Afaceri {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--blue)"}}>{fmt(yearStats.cifraAfaceri)} RON</div><div style={{fontSize:10,color:"var(--text3)"}}>(Incasari fara TVA)</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Incasari {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--green)"}}>{fmt(yearStats.tI)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Plati {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--red)"}}>{fmt(yearStats.tP)} RON</div></div>
             <div className="stat"><div style={{fontSize:12,color:"var(--text2)"}}>Ch. fTVA {year}</div><div style={{fontSize:22,fontWeight:700,color:"var(--orange)"}}>{fmt(yearStats.tCH)} RON</div></div>
@@ -1097,6 +1101,7 @@ function App() {
           <div className="card"><div className="card-header">📊 Raport Anual Complet — {year}</div><div className="card-body">
             <h3 style={{fontSize:16,fontWeight:700,marginBottom:16,textAlign:"center"}}>{firma.nume} — Raport Financiar Anual {year}</h3>
             <table style={{fontSize:14,marginBottom:20}}><tbody>
+              <tr style={{background:"var(--blue-bg)",borderBottom:"2px solid var(--blue)"}}><td style={{fontWeight:800,padding:"12px",fontSize:15}}>💼 Cifra de Afaceri</td><td style={{textAlign:"right",fontWeight:800,color:"var(--blue)",padding:"12px",fontSize:18}}>{fmt(yearStats.cifraAfaceri)} RON</td></tr>
               <tr><td style={{fontWeight:600,padding:"10px"}}>Total Incasari (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--green)",padding:"10px"}}>{fmt(yearStats.tI)} RON</td></tr>
               <tr style={{background:"var(--bg3)"}}><td style={{fontWeight:600,padding:"10px"}}>Total Plati facturi (cu TVA)</td><td style={{textAlign:"right",fontWeight:700,color:"var(--red)",padding:"10px"}}>{fmt(yearStats.tP)} RON</td></tr>
               <tr><td style={{fontWeight:600,padding:"10px"}}>Total Cheltuieli fara TVA</td><td style={{textAlign:"right",fontWeight:700,color:"var(--orange)",padding:"10px"}}>{fmt(yearStats.tCH)} RON</td></tr>
@@ -1108,15 +1113,15 @@ function App() {
 
             {/* Trimestrial summary */}
             <h4 style={{fontSize:14,fontWeight:700,marginBottom:10}}>📋 Sumar Trimestrial</h4>
-            <table style={{marginBottom:20}}><thead><tr><th>Trimestru</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"right"}}>Impozit</th></tr></thead><tbody>{quarterlyStats.map((q,i)=><tr key={i}><td style={{fontWeight:600}}>{q.name}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(q.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(q.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(q.tCH)}</td><td style={{textAlign:"right",color:q.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(q.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:600,color:q.profit>=0?"var(--green)":"var(--red)"}}>{fmt(q.profit)}</td><td style={{textAlign:"right",color:"var(--purple)"}}>{fmt(q.impozit)}</td></tr>)}</tbody></table>
+            <table style={{marginBottom:20}}><thead><tr><th>Trimestru</th><th style={{textAlign:"right",color:"var(--blue)"}}>CA</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"right"}}>Impozit</th></tr></thead><tbody>{quarterlyStats.map((q,i)=><tr key={i}><td style={{fontWeight:600}}>{q.name}</td><td style={{textAlign:"right",fontWeight:700,color:"var(--blue)"}}>{fmt(q.bI)}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(q.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(q.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(q.tCH)}</td><td style={{textAlign:"right",color:q.tvaDePlata>0?"var(--red)":"var(--green)"}}>{fmt(q.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:600,color:q.profit>=0?"var(--green)":"var(--red)"}}>{fmt(q.profit)}</td><td style={{textAlign:"right",color:"var(--purple)"}}>{fmt(q.impozit)}</td></tr>)}</tbody></table>
           </div></div>
 
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
             <div className="card" style={{borderColor:"var(--green)",borderWidth:2}}><div className="card-header">🏆 Top 10 Clienti — {year}</div><div className="card-body">{topClienti.length===0?<div style={{textAlign:"center",color:"var(--text3)",padding:16}}>Nu sunt incasari.</div>:<table><thead><tr><th>#</th><th>Client</th><th style={{textAlign:"right"}}>Total</th><th style={{textAlign:"right"}}>%</th></tr></thead><tbody>{topClienti.map(([n,v],i)=><tr key={n}><td style={{fontWeight:700,color:i<3?"var(--yellow)":"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{n}</td><td style={{textAlign:"right",fontWeight:600,color:"var(--green)"}}>{fmt(v)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{yearStats.tI>0?(v/yearStats.tI*100).toFixed(1):0}%</td></tr>)}</tbody></table>}</div></div>
             <div className="card" style={{borderColor:"var(--red)",borderWidth:2}}><div className="card-header">📊 Top 10 Cheltuieli — {year}</div><div className="card-body">{topFurnizori.length===0?<div style={{textAlign:"center",color:"var(--text3)",padding:16}}>Nu sunt cheltuieli.</div>:<table><thead><tr><th>#</th><th>Furnizor</th><th style={{textAlign:"right"}}>Total</th><th style={{textAlign:"right"}}>%</th></tr></thead><tbody>{topFurnizori.map(([n,v],i)=>{const tot=yearStats.tP+yearStats.tCH;return <tr key={n}><td style={{fontWeight:700,color:i<3?"var(--yellow)":"var(--text3)"}}>{i+1}</td><td style={{fontWeight:500}}>{n}</td><td style={{textAlign:"right",fontWeight:600,color:"var(--red)"}}>{fmt(v)}</td><td style={{textAlign:"right",color:"var(--text2)"}}>{tot>0?(v/tot*100).toFixed(1):0}%</td></tr>;})}</tbody></table>}</div></div>
           </div>
-          <div className="card"><div className="card-header">📅 Detalii Lunare — {year}</div><div className="card-body" style={{overflowX:"auto"}}><table><thead><tr><th>Luna</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"center"}}>Nr.</th></tr></thead><tbody>{MONTHS.map((m,i)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];const inc=md.incasari.reduce((s,x)=>s+x.amount,0);const pl=md.plati.reduce((s,x)=>s+x.amount,0);const tCH=ch.reduce((s,x)=>s+x.amount,0);const tI=md.incasari.reduce((s,x)=>s+getTva(x.amount),0);const tP=md.plati.reduce((s,x)=>s+getTva(x.amount),0);const pr=(inc-tI)-(pl-tP)-tCH;const has=md.plati.length>0||md.incasari.length>0||ch.length>0;const cnt=md.plati.length+md.incasari.length+ch.length;return <tr key={m} style={{opacity:has?1:0.4,cursor:"pointer"}} onClick={()=>{setMonth(m);setTab("dashboard");}}><td style={{fontWeight:600}}>{m}{m===month&&<span style={{marginLeft:6,fontSize:10,color:"var(--blue)"}}> ◀</span>}</td><td style={{textAlign:"right",color:"var(--green)"}}>{has?fmt(inc):"—"}</td><td style={{textAlign:"right",color:"var(--red)"}}>{has?fmt(pl):"—"}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{has?fmt(tCH):"—"}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{has?fmt(tI-tP):"—"}</td><td style={{textAlign:"right",fontWeight:600,color:pr>=0?"var(--green)":"var(--red)"}}>{has?fmt(pr):"—"}</td><td style={{textAlign:"center"}}>{has?<span style={{background:"var(--blue-bg2)",color:"var(--blue)",padding:"2px 10px",borderRadius:12,fontSize:12,fontWeight:600}}>{cnt}</span>:"—"}</td></tr>;})}</tbody>
-            <tfoot><tr style={{fontWeight:700,borderTop:"3px solid var(--border)",background:"var(--blue-bg)"}}><td>TOTAL {year}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(yearStats.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(yearStats.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(yearStats.tCH)}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{fmt(yearStats.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:800,color:yearStats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(yearStats.profit)}</td><td></td></tr></tfoot>
+          <div className="card"><div className="card-header">📅 Detalii Lunare — {year}</div><div className="card-body" style={{overflowX:"auto"}}><table><thead><tr><th>Luna</th><th style={{textAlign:"right",color:"var(--blue)"}}>CA</th><th style={{textAlign:"right"}}>Incasari</th><th style={{textAlign:"right"}}>Plati</th><th style={{textAlign:"right"}}>Ch. fTVA</th><th style={{textAlign:"right"}}>TVA</th><th style={{textAlign:"right"}}>Profit</th><th style={{textAlign:"center"}}>Nr.</th></tr></thead><tbody>{MONTHS.map((m,i)=>{const md=data[year]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[]};const ch=md.cheltuieliFaraTVA||[];const inc=md.incasari.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);const pl=md.plati.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);const tCH=ch.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+x.amount,0);const tvaInc=md.incasari.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+getTva(x.amount),0);const tvaPl=md.plati.filter(x=>x.tipPlata!=="Neachitat").reduce((s,x)=>s+getTva(x.amount),0);const ca=inc-tvaInc;const pr=ca-(pl-tvaPl)-tCH;const has=md.plati.length>0||md.incasari.length>0||ch.length>0;const cnt=md.plati.length+md.incasari.length+ch.length;return <tr key={m} style={{opacity:has?1:0.4,cursor:"pointer"}} onClick={()=>{setMonth(m);setTab("dashboard");}}><td style={{fontWeight:600}}>{m}{m===month&&<span style={{marginLeft:6,fontSize:10,color:"var(--blue)"}}> ◀</span>}</td><td style={{textAlign:"right",fontWeight:700,color:"var(--blue)"}}>{has?fmt(ca):"—"}</td><td style={{textAlign:"right",color:"var(--green)"}}>{has?fmt(inc):"—"}</td><td style={{textAlign:"right",color:"var(--red)"}}>{has?fmt(pl):"—"}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{has?fmt(tCH):"—"}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{has?fmt(tvaInc-tvaPl):"—"}</td><td style={{textAlign:"right",fontWeight:600,color:pr>=0?"var(--green)":"var(--red)"}}>{has?fmt(pr):"—"}</td><td style={{textAlign:"center"}}>{has?<span style={{background:"var(--blue-bg2)",color:"var(--blue)",padding:"2px 10px",borderRadius:12,fontSize:12,fontWeight:600}}>{cnt}</span>:"—"}</td></tr>;})}</tbody>
+            <tfoot><tr style={{fontWeight:700,borderTop:"3px solid var(--border)",background:"var(--blue-bg)"}}><td>TOTAL {year}</td><td style={{textAlign:"right",fontWeight:800,color:"var(--blue)"}}>{fmt(yearStats.cifraAfaceri)}</td><td style={{textAlign:"right",color:"var(--green)"}}>{fmt(yearStats.tI)}</td><td style={{textAlign:"right",color:"var(--red)"}}>{fmt(yearStats.tP)}</td><td style={{textAlign:"right",color:"var(--orange)"}}>{fmt(yearStats.tCH)}</td><td style={{textAlign:"right",color:"var(--yellow)"}}>{fmt(yearStats.tvaDePlata)}</td><td style={{textAlign:"right",fontWeight:800,color:yearStats.profit>=0?"var(--green)":"var(--red)"}}>{fmt(yearStats.profit)}</td><td></td></tr></tfoot>
           </table></div></div>
         </div>}
       </div>
