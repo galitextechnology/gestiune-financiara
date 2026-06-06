@@ -4,8 +4,8 @@
   "description": "Aplicatie de gestiune financiara pentru SC GALITEX TECHNOLOGY SRL",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#1a56db",
-  "theme_color": "#1a56db",
+  "background_color": "#18181b",
+  "theme_color": "#18181b",
   "orientation": "any",
   "icons": [
     {

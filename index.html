@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestiune Financiara - GALITEX TECHNOLOGY SRL</title>
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#1a56db">
+<meta name="theme-color" content="#18181b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Gestiune">
@@ -15,86 +15,92 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
-  --bg:#f0f2f5;--bg2:#fff;--bg3:#f9fafb;--bg-hover:#fafafa;
-  --text:#111827;--text2:#6b7280;--text3:#9ca3af;
-  --border:#e5e7eb;--border2:#f3f4f6;--border3:#d1d5db;
-  --card-shadow:0 1px 3px rgba(0,0,0,0.08);
-  --green:#059669;--red:#dc2626;--blue:#1a56db;--blue2:#1e40af;
-  --yellow:#f59e0b;--orange:#b45309;--purple:#7c3aed;
-  --green-bg:#ecfdf5;--red-bg:#fef2f2;--blue-bg:#eff6ff;--yellow-bg:#fffbeb;--blue-bg2:#e0edff;
-  --header-bg:linear-gradient(135deg,#1a56db,#1e40af);
-  --pre-bg:#1e293b;--pre-text:#e2e8f0;
+  --bg:#f8f9fb;--bg2:#fff;--bg3:#f3f4f7;--bg-hover:#f5f6f8;
+  --text:#18181b;--text2:#71717a;--text3:#a1a1aa;
+  --border:#e4e4e7;--border2:#f4f4f5;--border3:#d4d4d8;
+  --card-shadow:0 1px 2px rgba(0,0,0,0.04),0 1px 4px rgba(0,0,0,0.03);
+  --green:#10b981;--red:#ef4444;--blue:#3b82f6;--blue2:#2563eb;
+  --yellow:#eab308;--orange:#f97316;--purple:#8b5cf6;
+  --green-bg:#f0fdf4;--red-bg:#fef2f2;--blue-bg:#eff6ff;--yellow-bg:#fefce8;--blue-bg2:#dbeafe;
+  --header-bg:#18181b;
+  --pre-bg:#1e1e2e;--pre-text:#cdd6f4;
+  --radius:14px;
 }
 [data-theme="dark"]{
-  --bg:#111827;--bg2:#1f2937;--bg3:#374151;--bg-hover:#374151;
-  --text:#f3f4f6;--text2:#9ca3af;--text3:#6b7280;
-  --border:#374151;--border2:#4b5563;--border3:#4b5563;
-  --card-shadow:0 1px 3px rgba(0,0,0,0.3);
+  --bg:#09090b;--bg2:#18181b;--bg3:#27272a;--bg-hover:#27272a;
+  --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
+  --border:#27272a;--border2:#3f3f46;--border3:#3f3f46;
+  --card-shadow:0 1px 2px rgba(0,0,0,0.2);
   --green:#34d399;--red:#f87171;--blue:#60a5fa;--blue2:#3b82f6;
-  --yellow:#fbbf24;--orange:#f59e0b;--purple:#a78bfa;
-  --green-bg:#064e3b;--red-bg:#7f1d1d;--blue-bg:#1e3a5f;--yellow-bg:#78350f;--blue-bg2:#1e3a5f;
-  --header-bg:linear-gradient(135deg,#1e3a5f,#1e293b);
-  --pre-bg:#0f172a;--pre-text:#e2e8f0;
+  --yellow:#facc15;--orange:#fb923c;--purple:#a78bfa;
+  --green-bg:#052e16;--red-bg:#450a0a;--blue-bg:#172554;--yellow-bg:#422006;--blue-bg2:#1e3a5f;
+  --header-bg:#09090b;
+  --pre-bg:#09090b;--pre-text:#cdd6f4;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.2s,color 0.2s;font-size:14px;-webkit-font-smoothing:antialiased}
 input,select,button{font-family:inherit}
-.input{padding:10px 12px;border:1px solid var(--border3);border-radius:8px;font-size:14px;outline:none;width:100%;box-sizing:border-box;background:var(--bg2);color:var(--text);transition:background 0.3s,color 0.3s}
-.input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,0.1)}
-.btn{padding:10px 20px;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
-.btn:hover{opacity:0.9}
-.btn:disabled{opacity:0.5;cursor:not-allowed}
-.card{background:var(--bg2);border-radius:10px;box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;transition:background 0.3s}
-.card-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg3);font-weight:700;font-size:14px;transition:background 0.3s}
-.card-body{padding:12px 16px}
+.input{padding:9px 14px;border:1.5px solid var(--border3);border-radius:10px;font-size:13px;outline:none;width:100%;box-sizing:border-box;background:var(--bg2);color:var(--text);transition:all 0.15s}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.08)}
+.btn{padding:9px 18px;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;letter-spacing:-0.01em}
+.btn:hover{opacity:0.88;transform:translateY(-0.5px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.card{background:var(--bg2);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:14px;transition:background 0.2s}
+.card-header{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:700;font-size:13px;transition:background 0.2s;letter-spacing:-0.01em}
+.card-body{padding:16px 18px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{padding:7px 10px;text-align:left;font-weight:600;font-size:12px;background:var(--bg3);border-bottom:2px solid var(--border);transition:background 0.3s;text-transform:uppercase;letter-spacing:0.3px;color:var(--text2)}
-td{padding:6px 10px;border-bottom:1px solid var(--border2)}
+th{padding:8px 12px;text-align:left;font-weight:600;font-size:11px;background:var(--bg3);border-bottom:1.5px solid var(--border);transition:background 0.2s;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
+td{padding:8px 12px;border-bottom:1px solid var(--border2)}
 tr:hover{background:var(--bg-hover)}
-.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text)}
-.badge-cash{background:#fef3c7;color:#92400e}
-.badge-op{background:#dbeafe;color:#1e40af}
-.badge-neachitat{background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5}
-.stat{background:var(--bg2);border-radius:10px;padding:14px 16px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:160px;transition:background 0.3s}
-.tab{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all 0.2s}
-.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-.step{display:flex;align-items:center;gap:12px;padding:16px;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;background:var(--bg2)}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text2)}
+.badge-cash{background:#fef3c7;color:#a16207}
+.badge-op{background:#dbeafe;color:#2563eb}
+.badge-neachitat{background:#fef2f2;color:#dc2626;border:1.5px dashed #fca5a5}
+.stat{background:var(--bg2);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:160px;transition:all 0.15s}
+.stat:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-1px)}
+.tab{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all 0.15s;letter-spacing:-0.01em}
+.tab:hover{background:var(--bg3);color:var(--text)}
+.tab.active{background:var(--text);color:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.step{display:flex;align-items:center;gap:14px;padding:18px;border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--bg2)}
+.step:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.06)}
 .step.active{background:var(--blue-bg);border:2px solid var(--blue)}
-.step-num{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-pre{background:var(--pre-bg);color:var(--pre-text);padding:14px;border-radius:8px;font-size:11px;overflow:auto;max-height:200px;line-height:1.5;white-space:pre-wrap;word-break:break-all}
-.remove-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--red);padding:4px 8px}
-.remove-btn:hover{opacity:0.7}
-.edit-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--blue);padding:4px 8px}
-.edit-btn:hover{opacity:0.7}
-.bar-bg{background:var(--border);border-radius:4px;height:7px;overflow:hidden}
-.bar-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#1e40af);border-radius:4px;transition:width 0.3s}
-.alert-card{padding:10px 14px;border-radius:8px;border-left:4px solid;margin-bottom:8px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.alert-card .alert-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:2px 6px;flex-shrink:0}
-.alert-card .alert-close:hover{color:var(--text)}
-.alert-warn{border-color:#f59e0b;background:var(--yellow-bg);color:var(--text)}
-.alert-danger{border-color:#ef4444;background:var(--red-bg);color:var(--text)}
-.alert-info{border-color:#3b82f6;background:var(--blue-bg);color:var(--text)}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal{background:var(--bg2);border-radius:16px;padding:28px;max-width:520px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+.step-num{width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+pre{background:var(--pre-bg);color:var(--pre-text);padding:16px;border-radius:12px;font-size:12px;overflow:auto;max-height:200px;line-height:1.6;white-space:pre-wrap;word-break:break-all;font-family:'SF Mono',Menlo,monospace}
+.remove-btn{background:none;border:none;cursor:pointer;font-size:15px;color:var(--red);padding:4px 8px;border-radius:6px;transition:background 0.15s}
+.remove-btn:hover{background:var(--red-bg)}
+.edit-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--blue);padding:4px 8px;border-radius:6px;transition:background 0.15s}
+.edit-btn:hover{background:var(--blue-bg)}
+.bar-bg{background:var(--border);border-radius:6px;height:6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--blue);border-radius:6px;transition:width 0.4s ease}
+.alert-card{padding:12px 16px;border-radius:12px;border-left:3px solid;margin-bottom:8px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.alert-card .alert-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:2px 6px;flex-shrink:0;border-radius:6px;transition:background 0.15s}
+.alert-card .alert-close:hover{background:rgba(0,0,0,0.05);color:var(--text)}
+.alert-warn{border-color:var(--yellow);background:var(--yellow-bg);color:var(--text)}
+.alert-danger{border-color:var(--red);background:var(--red-bg);color:var(--text)}
+.alert-info{border-color:var(--blue);background:var(--blue-bg);color:var(--text)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal{background:var(--bg2);border-radius:20px;padding:28px;max-width:520px;width:90%;box-shadow:0 24px 48px rgba(0,0,0,0.12);max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
 .search-modal{max-width:720px}
 /* Oblio-style Registru de Casa */
 .rc-oblio-wrap{background:#fff;color:#000;padding:0}
 .rc-oblio-company{padding:20px 24px 0;font-size:13px;line-height:1.5}
 .rc-oblio-company strong{font-size:16px;display:block;margin-bottom:2px}
 .rc-oblio-title-wrap{text-align:center;padding:20px 0 8px}
-.rc-oblio-title{display:inline-block;background:#3d2c6e;color:#fff;padding:10px 40px;font-size:18px;font-weight:700;border-radius:4px}
+.rc-oblio-title{display:inline-block;background:#18181b;color:#fff;padding:10px 40px;font-size:18px;font-weight:700;border-radius:8px}
 .rc-oblio-period{text-align:center;font-size:13px;color:#333;margin-bottom:16px;border-bottom:1px solid #ddd;padding-bottom:12px}
 .rc-oblio-table{border-collapse:collapse;width:100%;background:#fff;color:#000;font-size:12px}
-.rc-oblio-table th{background:#3d2c6e;color:#fff;padding:10px 8px;text-align:center;font-weight:600;font-size:11px;border:1px solid #3d2c6e}
-.rc-oblio-table td{border:1px solid #ddd;padding:8px 10px;vertical-align:middle}
-.rc-oblio-table tr.rc-sold-row{background:#f8f9fa}
+.rc-oblio-table th{background:#18181b;color:#fff;padding:10px 8px;text-align:center;font-weight:600;font-size:11px;border:1px solid #18181b}
+.rc-oblio-table td{border:1px solid #e4e4e7;padding:8px 10px;vertical-align:middle}
+.rc-oblio-table tr.rc-sold-row{background:#f8f9fb}
 .rc-oblio-table tr.rc-sold-row td{font-weight:600;border-top:1px solid #bbb}
 .rc-oblio-footer{padding:16px 24px;font-size:13px;font-weight:600;border-top:1px solid #ddd;background:#fff;color:#000}
 .rc-oblio-page{text-align:center;padding:12px;font-size:12px;color:#666}
 .filter-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.filter-row select{padding:6px 10px;border-radius:6px;border:1px solid var(--border3);font-size:12px;background:var(--bg2);color:var(--text)}
-.filter-row label{font-size:11px;font-weight:600;color:var(--text2)}
+.filter-row select{padding:7px 12px;border-radius:10px;border:1.5px solid var(--border3);font-size:12px;background:var(--bg2);color:var(--text)}
+.filter-row label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px}
 @media print{
   :root,[data-theme="dark"]{
     --bg:#fff!important;--bg2:#fff!important;--bg3:#f9fafb!important;--bg-hover:#fafafa!important;
@@ -123,8 +129,8 @@ pre{background:var(--pre-bg);color:var(--pre-text);padding:14px;border-radius:8p
   #root>div>div:first-child{display:none!important}
   .main-content{padding:0 20px 20px!important;max-width:none!important}
   .rc-oblio-wrap{border:none!important;box-shadow:none!important}
-  .rc-oblio-table th{background:#3d2c6e!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .rc-oblio-title{background:#3d2c6e!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .rc-oblio-table th{background:#18181b!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .rc-oblio-title{background:#18181b!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .rc-oblio-table,.rc-oblio-table th,.rc-oblio-table td{border:1px solid #999!important}
   .rc-oblio-table tr.rc-sold-row{background:#f0f0f0!important;-webkit-print-color-adjust:exact!important}
   @page{size:A4;margin:10mm 12mm}
@@ -263,10 +269,10 @@ function LoginScreen({onLogin}) {
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px",background:"var(--bg)"}}>
       <div style={{maxWidth:"380px",width:"100%",animation:shake?"shake 0.5s":"none"}}>
         <style>{`@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}`}</style>
-        <div style={{textAlign:"center",marginBottom:"28px"}}>
-          <div style={{fontSize:"48px",marginBottom:"12px"}}>🔒</div>
-          <h1 style={{fontSize:"22px",fontWeight:"800",marginBottom:"6px"}}>Gestiune Financiara</h1>
-          <p style={{color:"var(--text2)",fontSize:14}}>Introdu parola pentru a accesa aplicatia</p>
+        <div style={{textAlign:"center",marginBottom:"32px"}}>
+          <div style={{width:56,height:56,borderRadius:16,background:"var(--text)",color:"var(--bg)",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:800,marginBottom:16}}>G</div>
+          <h1 style={{fontSize:"20px",fontWeight:"700",marginBottom:"6px",letterSpacing:"-0.02em"}}>Gestiune Financiara</h1>
+          <p style={{color:"var(--text3)",fontSize:13}}>Introdu parola pentru a accesa aplicatia</p>
         </div>
         <div className="card"><div className="card-body" style={{display:"flex",flexDirection:"column",gap:12}}>
           <input className="input" type="password" value={pwd} onChange={e=>{setPwd(e.target.value);setError(false);}} placeholder="Parola" onKeyDown={e=>e.key==="Enter"&&tryLogin()} autoFocus style={{fontSize:18,textAlign:"center",padding:"14px",letterSpacing:8}}/>
@@ -316,8 +322,8 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [scriptUrl, setScriptUrl] = useState("");
   const [data, setData] = useState(emptyData);
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState("Aprilie");
+  const [year, setYear] = useState(()=>new Date().getFullYear());
+  const [month, setMonth] = useState(()=>MONTHS[new Date().getMonth()]);
   const [tab, setTab] = useState("dashboard");
   const [saveStatus, setSaveStatus] = useState("idle");
   const [nextId, setNextId] = useState(1);
@@ -633,6 +639,36 @@ function App() {
     return list;
   },[chFTVA, filterCheltuieli]);
 
+  /* ===== REGISTRU DE CASA - calcul sold final pe orice luna ===== */
+  const calcSoldFinalForMonth = (y,m) => {
+    const md = data[y]?.[m]||{plati:[],incasari:[],cheltuieliFaraTVA:[],operatiuniCasa:[]};
+    const chF = md.cheltuieliFaraTVA||[];
+    const cashP = md.plati.filter(p=>(p.tipPlata||"OP")==="Cash");
+    const cashI = md.incasari.filter(i=>(i.tipPlata||"OP")==="Cash");
+    const cashC = chF.filter(c=>(c.tipPlata||"Cash")==="Cash");
+    let total = 0;
+    cashI.forEach(i=>{ total += i.amount; });
+    cashP.forEach(p=>{ total -= p.amount; });
+    cashC.forEach(c=>{ total -= c.amount; });
+    (md.operatiuniCasa||[]).forEach(o=>{ total += o.tipOp==="Incasare"?o.suma:-o.suma; });
+    return total;
+  };
+
+  /* Sold initial = sold manual DACA exista, ALTFEL = sold cumulat din toate lunile anterioare */
+  const getAutoSoldInit = (y,m) => {
+    const key=`${y}_${m}`;
+    const manual = (data.registruCasaSolduri||{})[key];
+    if(manual!==undefined && manual!==null && manual!==0) return manual;
+    /* Cumulam de la Ianuarie pana la luna anterioara */
+    const mi = monthIndex(m);
+    if(mi===0) return (data.registruCasaSolduri||{})[`${y}_Ianuarie`]||0;
+    let sold = (data.registruCasaSolduri||{})[`${y}_Ianuarie`]||0;
+    for(let i=0;i<mi;i++){
+      sold += calcSoldFinalForMonth(y,MONTHS[i]);
+    }
+    return sold;
+  };
+
   /* ===== REGISTRU DE CASA (Oblio format) ===== */
   const registruCasa = useMemo(()=>{
     const cashPlati = cur.plati.filter(p=>(p.tipPlata||"OP")==="Cash");
@@ -651,8 +687,7 @@ function App() {
     }));
     allOps.sort((a,b)=>(a.data||"").localeCompare(b.data||""));
 
-    const key=`${year}_${month}`;
-    const soldInit = (data.registruCasaSolduri||{})[key]||0;
+    const soldInit = getAutoSoldInit(year,month);
 
     const days = {};
     allOps.forEach(op=>{
@@ -678,13 +713,12 @@ function App() {
 
     const totalInc = allOps.reduce((s,r)=>s+r.incasare,0);
     const totalPl = allOps.reduce((s,r)=>s+r.plata,0);
-    return {rows, soldInit, soldFinal:currentSold, totalInc, totalPl, dayCount:dayKeys.length, opsCount:allOps.length};
+    return {rows, soldInit, soldFinal:currentSold, totalInc, totalPl, dayCount:dayKeys.length, opsCount:allOps.length, isAutoSold: !((data.registruCasaSolduri||{})[`${year}_${month}`])};
   },[cur,chFTVA,data,year,month]);
 
   useEffect(()=>{
-    const key=`${year}_${month}`;
-    setRcSoldInitial(String((data.registruCasaSolduri||{})[key]||0));
-  },[year,month,data.registruCasaSolduri]);
+    setRcSoldInitial(String(getAutoSoldInit(year,month)));
+  },[year,month,data]);
 
   /* Period display */
   const mIdx = monthIndex(month);
@@ -793,19 +827,22 @@ function App() {
 
   return (
     <div>
-      <div className="no-print" style={{background:"var(--header-bg)",color:"#fff",padding:"16px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
-        <div>
-          <div style={{fontSize:20,fontWeight:800}}>📊 {firma.nume||"Gestiune Financiara"}</div>
-          <div style={{fontSize:12,opacity:0.8}}>CUI: {firma.cui} · TVA 21% · Impozit 16%{saveLabel[saveStatus]&&<span style={{marginLeft:12,background:"rgba(255,255,255,0.2)",padding:"2px 10px",borderRadius:10,fontSize:11}}>{saveLabel[saveStatus]}</span>}</div>
+      <div className="no-print" style={{background:"var(--header-bg)",color:"#fafafa",padding:"14px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,borderBottom:"1px solid var(--border)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <div style={{width:32,height:32,borderRadius:10,background:"var(--blue)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800}}>G</div>
+          <div>
+            <div style={{fontSize:15,fontWeight:700,letterSpacing:"-0.02em"}}>{firma.nume||"Gestiune"}</div>
+            <div style={{fontSize:11,opacity:0.5,fontWeight:400}}>{firma.cui}{saveLabel[saveStatus]&&<span style={{marginLeft:8,opacity:0.8}}>{saveLabel[saveStatus]}</span>}</div>
+          </div>
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
-          <button className="btn" onClick={()=>{setShowSearch(true);setSearchQuery("");setSearchResults([]);}} style={{background:"rgba(255,255,255,0.15)",padding:"8px 14px",fontSize:13}}>🔍 Cauta</button>
-          <select value={year} onChange={e=>setYear(+e.target.value)} style={{padding:"8px 12px",borderRadius:8,border:"none",fontSize:14,fontWeight:600}}>{YEARS.map(y=><option key={y} value={y}>{y}</option>)}</select>
-          <select value={month} onChange={e=>setMonth(e.target.value)} style={{padding:"8px 12px",borderRadius:8,border:"none",fontSize:14,fontWeight:600,minWidth:120}}>{MONTHS.map(m=><option key={m} value={m}>{m}</option>)}</select>
-          <button className="btn" onClick={exportCSV} style={{background:"#059669"}}>⬇ CSV</button>
-          <button className="btn" onClick={exportExcel} style={{background:"#1d6f42"}}>⬇ Excel</button>
-          <button className="btn" onClick={()=>setDarkMode(!darkMode)} style={{background:"transparent",border:"1px solid rgba(255,255,255,0.3)",padding:"8px 12px",fontSize:16}}>{darkMode?"☀️":"🌙"}</button>
-          <button className="btn" onClick={()=>setShowSettings(true)} style={{background:"rgba(255,255,255,0.15)",fontSize:12,padding:"8px 12px"}}>⚙</button>
+        <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+          <button onClick={()=>{setShowSearch(true);setSearchQuery("");setSearchResults([]);}} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",color:"#fafafa",padding:"7px 14px",borderRadius:10,fontSize:12,cursor:"pointer",fontWeight:500}}>🔍 Cauta</button>
+          <select value={year} onChange={e=>setYear(+e.target.value)} style={{padding:"7px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",fontSize:13,fontWeight:600,background:"rgba(255,255,255,0.08)",color:"#fafafa"}}>{YEARS.map(y=><option key={y} value={y} style={{color:"#000"}}>{y}</option>)}</select>
+          <select value={month} onChange={e=>setMonth(e.target.value)} style={{padding:"7px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",fontSize:13,fontWeight:600,minWidth:110,background:"rgba(255,255,255,0.08)",color:"#fafafa"}}>{MONTHS.map(m=><option key={m} value={m} style={{color:"#000"}}>{m}</option>)}</select>
+          <div style={{width:1,height:20,background:"rgba(255,255,255,0.12)",margin:"0 2px"}}/>
+          <button onClick={exportExcel} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",color:"#fafafa",padding:"7px 12px",borderRadius:10,fontSize:12,cursor:"pointer",fontWeight:500}}>⬇ Excel</button>
+          <button onClick={()=>setDarkMode(!darkMode)} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",color:"#fafafa",padding:"7px 10px",borderRadius:10,fontSize:14,cursor:"pointer"}}>{darkMode?"☀️":"🌙"}</button>
+          <button onClick={()=>setShowSettings(true)} style={{background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.12)",color:"#fafafa",padding:"7px 10px",borderRadius:10,fontSize:14,cursor:"pointer"}}>⚙</button>
         </div>
       </div>
 
@@ -817,7 +854,7 @@ function App() {
         {(stats.neachitatPlati>0||stats.neachitatIncasari>0)&&<div className="alert-card alert-info"><div><span style={{marginRight:8}}>📋</span>Facturi neachitate: {stats.neachitatPlati>0?`Plati: ${fmt(stats.neachitatPlati)} RON`:""}{stats.neachitatPlati>0&&stats.neachitatIncasari>0?" · ":""}{stats.neachitatIncasari>0?`Incasari: ${fmt(stats.neachitatIncasari)} RON`:""}</div></div>}
       </div>}
 
-      <div className="no-print" style={{padding:"14px 28px 0",display:"flex",gap:6,flexWrap:"wrap"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
+      <div className="no-print" style={{padding:"12px 28px 0",display:"flex",gap:4,flexWrap:"wrap",borderBottom:"1px solid var(--border)"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
 
       <div className="main-content" style={{padding:"18px 28px 40px",maxWidth:1200}}>
 
@@ -1333,7 +1370,7 @@ function App() {
             </div>}
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:"1px solid var(--border)",paddingTop:12}}><span style={{fontWeight:600}}>Dark Mode</span><button className="btn" onClick={()=>setDarkMode(!darkMode)} style={{background:darkMode?"var(--green)":"var(--border3)",padding:"8px 24px"}}>{darkMode?"☀️ Light":"🌙 Dark"}</button></div>
-          <div style={{fontSize:11,color:"var(--text3)",borderTop:"1px solid var(--border)",paddingTop:12,textAlign:"center"}}>Gestiune Financiara v6.0 · {firma.nume}</div>
+          <div style={{fontSize:11,color:"var(--text3)",borderTop:"1px solid var(--border)",paddingTop:12,textAlign:"center"}}>Gestiune Financiara v7.0 · {firma.nume}</div>
         </div>
       </div></div>}
 

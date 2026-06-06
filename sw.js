@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestiune-v7';
+const CACHE_NAME = 'gestiune-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -26,9 +26,9 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Always go network-first for the Google Apps Script API
-  if (e.request.url.includes('script.google.com')) {
-    e.respondWith(fetch(e.request));
+  // Network-first for Google APIs and fonts
+  if (e.request.url.includes('script.google.com') || e.request.url.includes('fonts.googleapis.com') || e.request.url.includes('fonts.gstatic.com')) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
   // Cache-first for everything else
