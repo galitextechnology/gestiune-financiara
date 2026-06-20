@@ -26,7 +26,7 @@
   --green-bg:#f0fdf4;--red-bg:#fef2f2;--blue-bg:#eff6ff;--yellow-bg:#fefce8;--blue-bg2:#dbeafe;
   --header-bg:#18181b;
   --pre-bg:#1e1e2e;--pre-text:#cdd6f4;
-  --radius:14px;
+  --radius:10px;
 }
 [data-theme="dark"]{
   --bg:#09090b;--bg2:#18181b;--bg3:#27272a;--bg-hover:#27272a;
@@ -42,29 +42,29 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.2s,color 0.2s;font-size:14px;-webkit-font-smoothing:antialiased}
 input,select,button{font-family:inherit}
-.input{padding:9px 14px;border:1.5px solid var(--border3);border-radius:10px;font-size:13px;outline:none;width:100%;box-sizing:border-box;background:var(--bg2);color:var(--text);transition:all 0.15s}
+.input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;width:100%;box-sizing:border-box;background:var(--bg2);color:var(--text);transition:all 0.15s}
 .input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.08)}
-.btn{padding:9px 18px;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;letter-spacing:-0.01em}
+.btn{padding:8px 16px;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.15s;letter-spacing:-0.01em}
 .btn:hover{opacity:0.88;transform:translateY(-0.5px)}
 .btn:active{transform:translateY(0)}
 .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-.card{background:var(--bg2);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:14px;transition:background 0.2s}
-.card-header{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:700;font-size:13px;transition:background 0.2s;letter-spacing:-0.01em}
-.card-body{padding:16px 18px}
+.card{background:var(--bg2);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,0.03);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;transition:background 0.2s}
+.card-header{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:600;font-size:13px;transition:background 0.2s;letter-spacing:-0.01em}
+.card-body{padding:14px 16px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{padding:8px 12px;text-align:left;font-weight:600;font-size:11px;background:var(--bg3);border-bottom:1.5px solid var(--border);transition:background 0.2s;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3)}
 td{padding:8px 12px;border-bottom:1px solid var(--border2)}
 tr:hover{background:var(--bg-hover)}
-.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--bg3);color:var(--text2)}
+.badge{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500;background:var(--bg3);color:var(--text2)}
 .badge-cash{background:#fef3c7;color:#a16207}
 .badge-op{background:#dbeafe;color:#2563eb}
-.badge-neachitat{background:#fef2f2;color:#dc2626;border:1.5px dashed #fca5a5}
-.stat{background:var(--bg2);border-radius:var(--radius);padding:16px 20px;box-shadow:var(--card-shadow);border:1px solid var(--border);flex:1;min-width:160px;transition:all 0.15s}
-.stat:hover{box-shadow:0 2px 8px rgba(0,0,0,0.06);transform:translateY(-1px)}
-.tab{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all 0.15s;letter-spacing:-0.01em}
+.badge-neachitat{background:#fef2f2;color:#dc2626;border:1px dashed #fca5a5}
+.stat{background:var(--bg2);border-radius:var(--radius);padding:14px 18px;box-shadow:0 1px 3px rgba(0,0,0,0.03);border:1px solid var(--border);flex:1;min-width:150px;transition:all 0.15s}
+.stat:hover{box-shadow:0 2px 6px rgba(0,0,0,0.05)}
+.tab{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:all 0.15s}
 .tab:hover{background:var(--bg3);color:var(--text)}
-.tab.active{background:var(--text);color:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-.step{display:flex;align-items:center;gap:14px;padding:18px;border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--bg2)}
+.tab.active{background:var(--text);color:var(--bg);box-shadow:none}
+.step{display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:all 0.15s;background:var(--bg2)}
 .step:hover{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.06)}
 .step.active{background:var(--blue-bg);border:2px solid var(--blue)}
 .step-num{width:34px;height:34px;border-radius:50%;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
@@ -75,14 +75,14 @@ pre{background:var(--pre-bg);color:var(--pre-text);padding:16px;border-radius:12
 .edit-btn:hover{background:var(--blue-bg)}
 .bar-bg{background:var(--border);border-radius:6px;height:6px;overflow:hidden}
 .bar-fill{height:100%;background:var(--blue);border-radius:6px;transition:width 0.4s ease}
-.alert-card{padding:12px 16px;border-radius:12px;border-left:3px solid;margin-bottom:8px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.alert-card{padding:10px 14px;border-radius:8px;border-left:3px solid;margin-bottom:6px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .alert-card .alert-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:2px 6px;flex-shrink:0;border-radius:6px;transition:background 0.15s}
 .alert-card .alert-close:hover{background:rgba(0,0,0,0.05);color:var(--text)}
 .alert-warn{border-color:var(--yellow);background:var(--yellow-bg);color:var(--text)}
 .alert-danger{border-color:var(--red);background:var(--red-bg);color:var(--text)}
 .alert-info{border-color:var(--blue);background:var(--blue-bg);color:var(--text)}
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal{background:var(--bg2);border-radius:20px;padding:28px;max-width:520px;width:90%;box-shadow:0 24px 48px rgba(0,0,0,0.12);max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
+.modal{background:var(--bg2);border-radius:14px;padding:24px;max-width:520px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,0.1);max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
 .search-modal{max-width:720px}
 /* Oblio-style Registru de Casa */
 .rc-oblio-wrap{background:#fff;color:#000;padding:0}
@@ -99,7 +99,7 @@ pre{background:var(--pre-bg);color:var(--pre-text);padding:16px;border-radius:12
 .rc-oblio-footer{padding:16px 24px;font-size:13px;font-weight:600;border-top:1px solid #ddd;background:#fff;color:#000}
 .rc-oblio-page{text-align:center;padding:12px;font-size:12px;color:#666}
 .filter-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
-.filter-row select{padding:7px 12px;border-radius:10px;border:1.5px solid var(--border3);font-size:12px;background:var(--bg2);color:var(--text)}
+.filter-row select{padding:6px 10px;border-radius:8px;border:1px solid var(--border);font-size:12px;background:var(--bg2);color:var(--text)}
 .filter-row label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px}
 @media print{
   :root,[data-theme="dark"]{
@@ -300,6 +300,44 @@ function LineChart({dataPoints, width=700, height=250, lineColor="var(--blue)", 
       <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round"/>
       {points.map((p,i)=><g key={i}><circle cx={p.x} cy={p.y} r="3.5" fill={lineColor} stroke="var(--bg2)" strokeWidth="2"/><text x={p.x} y={height-8} textAnchor="middle" fill="var(--text2)" fontSize="9">{dataPoints[i].label}</text></g>)}
     </svg>
+  );
+}
+
+function ComboBox({value, onChange, options, placeholder="", onKeyDown, style={}}) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState("");
+  const ref = useRef(null);
+  const listRef = useRef(null);
+
+  useEffect(()=>{
+    const handleClick = (e) => { if(ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    return ()=>document.removeEventListener("mousedown", handleClick);
+  },[]);
+
+  const filtered = options.filter(o => o.toLowerCase().includes((filter||value||"").toLowerCase()));
+
+  return (
+    <div ref={ref} style={{position:"relative",...style}}>
+      <div style={{position:"relative"}}>
+        <input
+          className="input"
+          value={value}
+          onChange={e=>{onChange(e.target.value);setFilter(e.target.value);if(!open)setOpen(true);}}
+          onFocus={()=>setOpen(true)}
+          onKeyDown={e=>{
+            if(e.key==="Escape")setOpen(false);
+            if(e.key==="Enter"){setOpen(false);if(onKeyDown)onKeyDown(e);}
+          }}
+          placeholder={placeholder}
+          style={{paddingRight:28}}
+        />
+        <div onClick={()=>setOpen(!open)} style={{position:"absolute",right:1,top:1,bottom:1,width:26,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",borderLeft:"1px solid var(--border)",background:"var(--bg3)",borderRadius:"0 7px 7px 0",fontSize:10,color:"var(--text3)",userSelect:"none"}}>{open?"▲":"▼"}</div>
+      </div>
+      {open&&filtered.length>0&&<div ref={listRef} style={{position:"absolute",top:"100%",left:0,right:0,zIndex:999,background:"var(--bg2)",border:"1px solid var(--border3)",borderTop:"none",borderRadius:"0 0 8px 8px",maxHeight:180,overflowY:"auto",boxShadow:"0 4px 12px rgba(0,0,0,0.08)"}}>
+        {filtered.map(o=><div key={o} onClick={()=>{onChange(o);setOpen(false);setFilter("");}} style={{padding:"7px 12px",fontSize:13,cursor:"pointer",background:o===value?"var(--blue-bg)":"transparent",borderBottom:"1px solid var(--border2)",fontWeight:o===value?600:400}} onMouseEnter={e=>e.target.style.background="var(--bg-hover)"} onMouseLeave={e=>e.target.style.background=o===value?"var(--blue-bg)":"transparent"}>{o}</div>)}
+      </div>}
+    </div>
   );
 }
 
@@ -974,13 +1012,13 @@ function App() {
   const saveLabel={idle:"",pending:"⏳",saving:"💾 Se salveaza...",saved:"✅ Salvat",error:"❌ Eroare"};
   const maxCat=Math.max(...Object.values(stats.catMap),1);
   const maxCatNT=Math.max(...Object.values(stats.catMapNoTVA),1);
-  const TABS=[["dashboard","📊 Dashboard"],["plati","📤 Plati (TVA)"],["cheltuieli","💼 Ch. fara TVA"],["incasari","📥 Incasari"],["registru","📒 Registru Casa"],["grafice","📈 Grafice"],["trimestrial","📋 Trimestrial"],["rapoarte","🖨 Rapoarte"],["contacte","👥 Contacte"],["anual","📅 Anual"]];
+  const TABS=[["dashboard","Dashboard"],["plati","Plati"],["cheltuieli","Cheltuieli fTVA"],["incasari","Incasari"],["registru","Registru Casa"],["grafice","Grafice"],["trimestrial","Trimestrial"],["rapoarte","Rapoarte"],["contacte","Contacte"],["anual","Anual"]];
 
   const TipPlataBadge=({tip})=>tip==="Neachitat"?<span className="badge badge-neachitat">⏳ Neachitat</span>:tip==="Cash"?<span className="badge badge-cash">💵 Cash</span>:<span className="badge badge-op">🏦 OP</span>;
 
   return (
     <div>
-      <div className="no-print" style={{background:"var(--header-bg)",color:"#fafafa",padding:"14px 28px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,borderBottom:"1px solid var(--border)"}}>
+      <div className="no-print" style={{background:"var(--header-bg)",color:"#fafafa",padding:"12px 24px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,borderBottom:"1px solid var(--border)"}}>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <div style={{width:32,height:32,borderRadius:10,background:"var(--blue)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800}}>G</div>
           <div>
@@ -1007,9 +1045,9 @@ function App() {
         {(stats.neachitatPlati>0||stats.neachitatIncasari>0)&&<div className="alert-card alert-info"><div><span style={{marginRight:8}}>📋</span>Facturi neachitate: {stats.neachitatPlati>0?`Plati: ${fmt(stats.neachitatPlati)} RON`:""}{stats.neachitatPlati>0&&stats.neachitatIncasari>0?" · ":""}{stats.neachitatIncasari>0?`Incasari: ${fmt(stats.neachitatIncasari)} RON`:""}</div></div>}
       </div>}
 
-      <div className="no-print" style={{padding:"12px 28px 0",display:"flex",gap:4,flexWrap:"wrap",borderBottom:"1px solid var(--border)"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
+      <div className="no-print" style={{padding:"10px 24px 0",display:"flex",gap:4,flexWrap:"wrap",borderBottom:"1px solid var(--border)"}}>{TABS.map(([k,l])=><button key={k} className={"tab"+(tab===k?" active":"")} onClick={()=>setTab(k)}>{l}</button>)}</div>
 
-      <div className="main-content" style={{padding:"18px 28px 40px",maxWidth:1200}}>
+      <div className="main-content" style={{padding:"16px 24px 40px",maxWidth:1200}}>
 
         {/* DASHBOARD */}
         {tab==="dashboard"&&<div>
@@ -1144,9 +1182,9 @@ function App() {
         {/* PLATI */}
         {tab==="plati"&&<div className="card"><div className="card-header">📤 Plati Furnizori (cu TVA) — {month} {year}</div><div className="card-body">
           <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
-            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Furnizor</label><input className="input" list="fl" value={newP.name} onChange={e=>setNewP({...newP,name:e.target.value})} placeholder="Furnizor" onKeyDown={e=>e.key==="Enter"&&addPlata()}/><datalist id="fl">{furnizori.map(f=><option key={f} value={f}/>)}</datalist></div>
+            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Furnizor</label><ComboBox value={newP.name} onChange={v=>setNewP({...newP,name:v})} options={furnizori} placeholder="Furnizor" onKeyDown={e=>e.key==="Enter"&&addPlata()}/></div>
             <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newP.amount} onChange={e=>setNewP({...newP,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addPlata()}/></div>
-            <div style={{flex:1,minWidth:120}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><select className="input" value={newP.category} onChange={e=>setNewP({...newP,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>
+            <div style={{flex:1,minWidth:120}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><ComboBox value={newP.category} onChange={v=>setNewP({...newP,category:v})} options={CATS} placeholder="Categorie"/></div>
             <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newP.tipPlata} onChange={e=>setNewP({...newP,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newP.data} onChange={e=>setNewP({...newP,data:e.target.value})}/></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Scadenta</label><input className="input" type="date" value={newP.scadenta} onChange={e=>setNewP({...newP,scadenta:e.target.value})}/></div>
@@ -1174,7 +1212,7 @@ function App() {
           <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
             <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Descriere</label><input className="input" value={newC.name} onChange={e=>setNewC({...newC,name:e.target.value})} placeholder="Ex: Salarii aprilie" onKeyDown={e=>e.key==="Enter"&&addCheltuiala()}/></div>
             <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma (RON)</label><input className="input" type="number" value={newC.amount} onChange={e=>setNewC({...newC,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addCheltuiala()}/></div>
-            <div style={{flex:1,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><select className="input" value={newC.category} onChange={e=>setNewC({...newC,category:e.target.value})}>{CATS_NOTVA.map(c=><option key={c}>{c}</option>)}</select></div>
+            <div style={{flex:1,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie</label><ComboBox value={newC.category} onChange={v=>setNewC({...newC,category:v})} options={CATS_NOTVA} placeholder="Categorie"/></div>
             <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newC.tipPlata} onChange={e=>setNewC({...newC,tipPlata:e.target.value})}><option value="Cash">💵 Cash</option><option value="OP">🏦 OP</option></select></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data</label><input className="input" type="date" value={newC.data} onChange={e=>setNewC({...newC,data:e.target.value})}/></div>
             <button className="btn" onClick={addCheltuiala} style={{background:"var(--orange)"}}>+ Adauga</button>
@@ -1198,7 +1236,7 @@ function App() {
         {/* INCASARI */}
         {tab==="incasari"&&<div className="card"><div className="card-header">📥 Incasari Clienti — {month} {year}</div><div className="card-body">
           <div className="no-print" style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"flex-end"}}>
-            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Client</label><input className="input" list="cl" value={newI.name} onChange={e=>setNewI({...newI,name:e.target.value})} placeholder="Client" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/><datalist id="cl">{clienti.map(c=><option key={c} value={c}/>)}</datalist></div>
+            <div style={{flex:2,minWidth:140}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Client</label><ComboBox value={newI.name} onChange={v=>setNewI({...newI,name:v})} options={clienti} placeholder="Client" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/></div>
             <div style={{flex:1,minWidth:100}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Suma cu TVA</label><input className="input" type="number" value={newI.amount} onChange={e=>setNewI({...newI,amount:e.target.value})} placeholder="0.00" step="0.01" onKeyDown={e=>e.key==="Enter"&&addIncasare()}/></div>
             <div style={{minWidth:90}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Tip plata</label><select className="input" value={newI.tipPlata} onChange={e=>setNewI({...newI,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
             <div style={{minWidth:130}}><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Data facturii</label><input className="input" type="date" value={newI.data} onChange={e=>setNewI({...newI,data:e.target.value})}/></div>
@@ -1247,10 +1285,7 @@ function App() {
                   {newOpCasa.numeOp==="Transfer"&&<div style={{fontSize:11,color:"var(--blue)",marginTop:4,fontStyle:"italic"}}>Transfer intern — nu se inregistreaza la plati/incasari</div>}
                 </div>
                 <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Categorie (optional)</label>
-                  <select className="input" value={newOpCasa.categorie} onChange={e=>setNewOpCasa({...newOpCasa,categorie:e.target.value})}>
-                    <option value="">Categoria</option>
-                    {CATS.map(c=><option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <ComboBox value={newOpCasa.categorie} onChange={v=>setNewOpCasa({...newOpCasa,categorie:v})} options={["", ...CATS]} placeholder="Categorie"/>
                 </div>
                 <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:4}}>Nume operatiune</label>
                   <select className="input" value={newOpCasa.numeOp} onChange={e=>setNewOpCasa({...newOpCasa,numeOp:e.target.value})}>
@@ -1610,8 +1645,8 @@ function App() {
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{editModal.type==="plati"?"Furnizor":editModal.type==="cheltuieliFaraTVA"?"Descriere":"Client"}</label><input className="input" value={editModal.name} onChange={e=>setEditModal({...editModal,name:e.target.value})}/></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>{editModal.type==="cheltuieliFaraTVA"?"Suma (RON)":"Suma cu TVA"}</label><input className="input" type="number" value={editModal.amount} onChange={e=>setEditModal({...editModal,amount:e.target.value})} step="0.01"/></div>
-          {editModal.type==="plati"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS.map(c=><option key={c}>{c}</option>)}</select></div>}
-          {editModal.type==="cheltuieliFaraTVA"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><select className="input" value={editModal.category} onChange={e=>setEditModal({...editModal,category:e.target.value})}>{CATS_NOTVA.map(c=><option key={c}>{c}</option>)}</select></div>}
+          {editModal.type==="plati"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><ComboBox value={editModal.category} onChange={v=>setEditModal({...editModal,category:v})} options={CATS} placeholder="Categorie"/></div>}
+          {editModal.type==="cheltuieliFaraTVA"&&<div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Categorie</label><ComboBox value={editModal.category} onChange={v=>setEditModal({...editModal,category:v})} options={CATS_NOTVA} placeholder="Categorie"/></div>}
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Tip plata</label><select className="input" value={editModal.tipPlata} onChange={e=>setEditModal({...editModal,tipPlata:e.target.value})}><option value="OP">🏦 OP</option><option value="Cash">💵 Cash</option><option value="Neachitat">⏳ Neachitat</option></select></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Data</label><input className="input" type="date" value={editModal.data} onChange={e=>setEditModal({...editModal,data:e.target.value})}/></div>
           <div><label style={{fontSize:12,fontWeight:600,display:"block",marginBottom:3,color:"var(--text2)"}}>Nr. document (optional)</label><input className="input" value={editModal.nrDocument} onChange={e=>setEditModal({...editModal,nrDocument:e.target.value})} placeholder="Nr. document"/></div>
